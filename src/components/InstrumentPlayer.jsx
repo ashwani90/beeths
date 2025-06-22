@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Soundfont from 'soundfont-player';
 
+
+// Soundfont is mostly deprecated so no need to have it
 const instruments = [
   'acoustic_grand_piano',
   'violin',
