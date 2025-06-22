@@ -4,6 +4,7 @@ import { Midi } from '@tonejs/midi';
 import * as Tone from 'tone';
 // import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import PianoRoll from './components/PianoRoll';
 import DrumPad from './components/DrumPad';
 import InstrumentPlayer from './components/InstrumentPlayer';
@@ -13,6 +14,10 @@ import MidiVisualizer from './components/MidiReader';
 import MidiPlayer from './components/MidiPlayer';
 import PianoRollVisualizer from './components/PianoVisualizer';
 import PianoButton from './components/PlayPiano';
+import Navbar from './components/Navbar';
+import NotFound from './components/NotFound';
+
+// import Navbar from './components/Navbar';
 
 function App() {
   const [file, setFile] = useState(null);
@@ -47,8 +52,19 @@ function App() {
 
   return (
     <div>
+      <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<PianoRollVisualizer />} />
+        <Route path="/demo" element={<MusicEditorDemo />} />
+        <Route path="/visualizer" element={<MidiVisualizer />} />
+        <Route path="/player" element={<MidiPlayer />} />
+        {/* Catch-all route for 404 pages */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
       {/* <PianoButton /> */}
-      <PianoRollVisualizer />
+      {/* <PianoRollVisualizer /> */}
       {/* <MidiPlayer /> */}
       {/* <MidiVisualizer /> */}
       {/* <MusicEditorDemo /> */}
