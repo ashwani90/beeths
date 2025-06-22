@@ -3,6 +3,7 @@ import { Midi } from '@tonejs/midi';
 import * as Tone from 'tone';
 import { exportToMidi } from '../utils/track';
 import usePianoSampler from '../hooks/usePianoSample';
+import exportToAudio from '../utils/audio';
 
 const NOTE_HEIGHT = 8;
 const PIXELS_PER_SECOND = 100;
@@ -14,6 +15,7 @@ const PianoRollVisualizer = () => {
   const [duration, setDuration] = useState(0);
   const [midiName, setMidiName] = useState('');
   const sampler = usePianoSampler();
+  const recorder = useRef(new Tone.Recorder());
   const cursorRef = useRef(null);
 
   const handleFileUpload = async (e) => {
@@ -23,8 +25,8 @@ const PianoRollVisualizer = () => {
     const arrayBuffer = await file.arrayBuffer();
     const midi = new Midi(arrayBuffer);
 
-    const trackData = midi.tracks.map((track, index) => ({
-      name: track.name || track.instrument.name || `Track ${index}`,
+    const trackData = midi.tracks.filter((track) => track.notes.length > 0).map((track, index) => ({
+      name: track.instrument.name || track.name || `Track ${index}`,
       notes: track.notes,
       index,
       color: `hsl(${(index * 72) % 360}, 70%, 60%)`,
@@ -93,6 +95,7 @@ const PianoRollVisualizer = () => {
   
     tracks.forEach((track, i) => {
       track.notes.forEach(note => {
+        console.log("triggered note ", now + note.time, "For duration", note.duration, "with velocity", note.velocity);
         // Ensure sampler is loaded before triggering
         if (synths[i] && note.midi) {
           synths[i].triggerAttackRelease(
@@ -124,6 +127,53 @@ const PianoRollVisualizer = () => {
     };
   
     requestAnimationFrame(animate);
+  };
+
+  
+  const exportToWav = async (tracks) => {
+    await Tone.start();
+
+    const recorder = new Tone.Recorder();
+    const synth = new Tone.PolySynth(Tone.Synth).connect(recorder);
+    recorder.start();
+
+    const now = Tone.now();
+
+    tracks.forEach((track) => {
+      track.notes.forEach((note) => {
+        synth.triggerAttackRelease(
+          Tone.Frequency(note.midi, "midi"),
+          note.duration,
+          now + note.time
+        );
+      });
+    });
+
+    Tone.Transport.start();
+
+    // Wait for playback duration
+    const playbackDuration = tracks.reduce((max, track) => {
+      const lastNote = track.notes[track.notes.length - 1];
+      return Math.max(max, lastNote.time + lastNote.duration);
+    }, 0);
+
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        Tone.Transport.stop();
+        resolve();
+      }, (playbackDuration + 0.5) * 1000)
+    );
+
+    // Stop recording and save the file
+    const recording = await recorder.stop();
+    const blob = new Blob([recording], { type: "audio/wav" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${midiName || "output"}.wav`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
   
 
@@ -182,6 +232,12 @@ const PianoRollVisualizer = () => {
         >
         💾 Export MIDI
         </button>
+        <button
+        className="mt-2 ml-2 px-4 py-2 bg-blue-600 text-white rounded"
+        onClick={() => exportToWav(tracks)}
+      >
+        🎵 Export MP3
+      </button>
         
     </div>
   );
