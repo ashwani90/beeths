@@ -63,7 +63,7 @@ const MidiPlayer = () => {
 
   return (
     <div className="p-4 max-w-xl mx-auto bg-white shadow rounded">
-      <h2 className="text-xl font-bold mb-4">🎵 MIDI Player</h2>
+      <h2 className="text-xl font-bold mb-4">🎵 Simple MIDI Player</h2>
 
       <input type="file" accept=".mid" onChange={loadMidi} />
       <button
