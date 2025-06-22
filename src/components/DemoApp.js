@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
+import usePianoSampler from '../hooks/usePianoSample';
+import { urlsObj } from '../data/notesUrl';
 
 const NOTES_IN_OCTAVE = 12;
 const NOTE_HEIGHT = 20;
@@ -184,11 +186,12 @@ export default function MusicEditorDemo() {
   const [selectedInstrument, setSelectedInstrument] = useState('piano');
   const [playingNotes, setPlayingNotes] = useState([]);
   const [playingStep, setPlayingStep] = useState(0);
-  const synth = useRef(null);
+  let synth = useRef(null);
   const drumSampler = useRef(null);
+  const pianoSampler = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    synth.current = new Tone.PolySynth(Tone.Synth).toDestination();
     drumSampler.current = new Tone.Sampler({
       urls: {
         36: "kick.wav", // Kick
@@ -199,10 +202,37 @@ export default function MusicEditorDemo() {
     }).toDestination();
   }, []);
 
+  useEffect(() => {
+    pianoSampler.current = new Tone.Sampler({
+      urls: urlsObj,
+    }).toDestination();
+  }, []);
+
+  const playNotes = async () => {
+    if (isPlaying) return; // Prevent multiple playbacks
+    setIsPlaying(true);
+
+    await Tone.start();
+
+    const now = Tone.now();
+
+    notes.forEach(({ midi, startTime, duration }) => {
+      pianoSampler.current.triggerAttackRelease(
+        Tone.Frequency(midi, "midi"),
+        duration,
+        now + startTime
+      );
+    });
+
+    // Stop playback after the last note
+    const playbackDuration = Math.max(...notes.map((note) => note.startTime + note.duration));
+    setTimeout(() => setIsPlaying(false), playbackDuration * 1000);
+  };
+
   function playNotesAtTime(time) {
     notes.forEach(({ midi, startTime, duration, instrument }) => {
       if (startTime >= time && startTime < time + 0.25) {
-        synth.current.triggerAttackRelease(Tone.Frequency(midi, "midi"), duration);
+        synth.triggerAttackRelease(Tone.Frequency(midi, "midi"), duration);
       }
     });
 
@@ -250,7 +280,7 @@ export default function MusicEditorDemo() {
       </div>
 
       <div style={{ marginTop: 20 }}>
-        <button onClick={startPlayback} style={{ marginRight: 10 }}>
+        <button onClick={playNotes} style={{ marginRight: 10 }}>
           Play
         </button>
         <button onClick={stopPlayback}>Stop</button>
