@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
-import usePianoSampler from '../hooks/usePianoSample';
 import { urlsObj } from '../data/notesUrl';
 
 const NOTES_IN_OCTAVE = 12;
@@ -215,7 +214,7 @@ export default function MusicEditorDemo() {
     await Tone.start();
 
     const now = Tone.now();
-
+    console.log(notes);
     notes.forEach(({ midi, startTime, duration }) => {
       pianoSampler.current.triggerAttackRelease(
         Tone.Frequency(midi, "midi"),
@@ -284,6 +283,8 @@ export default function MusicEditorDemo() {
           Play
         </button>
         <button onClick={stopPlayback}>Stop</button>
+        <button >Export To Midi</button>
+        <button >Export To Audio</button>
       </div>
     </div>
   );
