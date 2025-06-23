@@ -19,7 +19,7 @@ export const groupByInstrument = (notes) => {
 
 
   
-  export const exportToMidi = (tracks) => {
+  export const exportToMidi = (tracks, index=0) => {
     const midi = new Midi();
   
     tracks.forEach((track, index) => {
@@ -28,12 +28,25 @@ export const groupByInstrument = (notes) => {
       midiTrack.channel = index % 16; // MIDI has 16 channels (0–15)
   
       track.notes.forEach(note => {
-        midiTrack.addNote({
-          midi: note.midi,
-          time: note.time,
-          duration: note.duration,
-          velocity: note.velocity ?? 0.8, // Default if not set
-        });
+        if (index==0) {
+          midiTrack.addNote({
+            midi: note.midi,
+            time: note.time,
+            duration: note.duration,
+            velocity: note.velocity ?? 0.8, // Default if not set
+          });
+        } else {
+          let target = parseInt(note.time/10);
+          if (target == index) {
+            midiTrack.addNote({
+              midi: note.midi,
+              time: note.time,
+              duration: note.duration,
+              velocity: note.velocity ?? 0.8, // Default if not set
+            });
+          }
+        }
+        
       });
     });
   
