@@ -228,7 +228,7 @@ const PianoRollVisualizer = () => {
       )}
       <button
         className="mt-2 ml-2 px-4 py-2 bg-green-600 text-white rounded"
-        onClick={() => exportToMidi(tracks)}
+        onClick={() => exportToMidi(tracks, 0)}
         >
         💾 Export MIDI
         </button>
