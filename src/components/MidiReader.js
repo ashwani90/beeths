@@ -1,10 +1,24 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Midi } from '@tonejs/midi';
 import { groupByInstrument } from '../utils/track';
+import playNotesTone from '../utils/playNotes';
+import * as Tone from 'tone';
+import { urlsObj } from '../data/notesUrl';
+import { exportToMidi } from '../utils/track';
 
 export default function MidiVisualizer() {
   const [notes, setNotes] = useState([]);
+  const [allNotes, setAllNotes] = useState([]);
   const fileInputRef = useRef();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const pianoSampler = useRef(null);
+  const [tracks, setTracks] = useState([]);
+
+  useEffect(() => {
+    pianoSampler.current = new Tone.Sampler({
+      urls: urlsObj,
+    }).toDestination();
+  }, []);
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
@@ -17,8 +31,12 @@ export default function MidiVisualizer() {
     midi.tracks.forEach((track, trackIndex) => {
         const instrumentName = track.instrument.name || `Track ${trackIndex + 1}`;
       track.notes.forEach(note => {
-        
-        extractedNotes.push({
+        console.log(parseInt(note.time/30));
+        let index = parseInt(note.time/10);
+        if (!extractedNotes[index]) {
+          extractedNotes[index] = [];
+        }
+        extractedNotes[index].push({
           midi: note.midi,
           name: note.name,
           time: note.time,
@@ -30,9 +48,32 @@ export default function MidiVisualizer() {
         });
       });
     });
-
-    setNotes(extractedNotes);
+    setTracks(midi.tracks);
+    setNotes(extractedNotes[0]);
+    setAllNotes(extractedNotes);
   };
+
+  const playNotes = async () => {
+    console.log(notes);
+    if (isPlaying) return; // Prevent multiple playbacks
+    setIsPlaying(true);
+    await Tone.start();
+
+    const now = Tone.now();
+    let i = 0;
+    while (i<100) {
+      pianoSampler.current.triggerAttackRelease(
+        Tone.Frequency(notes[i].midi, "midi"),
+        notes[i].duration,
+        now + notes[i].time
+      );
+      i += 1;
+    }
+
+    // Stop playback after the last note
+    const playbackDuration = Math.max(...notes.map((note) => note.startTime + note.duration));
+    setTimeout(() => setIsPlaying(false), playbackDuration * 1000);
+  }
 
   const handleDrag = (id, deltaX, deltaY, isResize) => {
     setNotes(prev =>
@@ -106,6 +147,15 @@ export default function MidiVisualizer() {
       <div style={{ margin: '20px', padding: "10px", overflow: 'auto', border: '1px solid black' }}>
         {notes.length > 0 ? renderPianoRoll() : <p>Upload a MIDI file to see notes.</p>}
       </div>
+      <button  onClick={playNotes} style={{ marginRight: 10 }}>
+          Play
+        </button>
+        <button onClick={() => exportToMidi(tracks, 10)} style={{ marginRight: 10 }}>
+          Export To Midi
+        </button>
+        <button  style={{ marginRight: 10 }}>
+          Export To Audio
+        </button>
     </div>
   );
 }
