@@ -17,7 +17,7 @@ const PianoRollVisualizer = () => {
   const [midiName, setMidiName] = useState('');
   const sampler = usePianoSampler();
   const recorder = useRef(new Tone.Recorder());
-  const cursorRefs = useRef(tracks.map(() => React.createRef()));
+  let cursorRefs = useRef([]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -37,6 +37,11 @@ const PianoRollVisualizer = () => {
     setDuration(midi.duration);
     setMidiName(file.name);
   };
+
+  useEffect(() => {
+    // Initialize refs dynamically based on tracks length
+    cursorRefs.current = tracks.map(() => React.createRef());
+  }, [tracks]);
 
   const drawTrack = (canvas, notes, color) => {
     const ctx = canvas.getContext('2d');
@@ -107,27 +112,34 @@ const PianoRollVisualizer = () => {
           );
         }
       });
-      const cursor = cursorRefs[i].current;
-      cursor.style.left = '0px';
-      cursor.style.display = 'block';
-      const start = performance.now();
-    
-      const animate = (time) => {
-        const elapsed = (time - start) / 1000;
-        const x = elapsed * PIXELS_PER_SECOND;
-        cursor.style.left = `${x}px`;
-    
-        if (elapsed < duration) {
-          requestAnimationFrame(animate);
-        } else {
-          cursor.style.display = 'none';
-        }
-      };
+      
     });
   
-    // Cursor animation
-    
-  
+    const PIXELS_PER_SECOND = 100;
+    const duration = 5; // seconds
+
+    const start = performance.now();
+
+    const animate = (time) => {
+      const elapsed = (time - start) / 1000;
+      const x = elapsed * PIXELS_PER_SECOND;
+
+      cursorRefs.current.forEach((cursorRef) => {
+        if (cursorRef.current) {
+          if (elapsed < duration) {
+            cursorRef.current.style.left = `${x}px`;
+            cursorRef.current.style.display = "block";
+          } else {
+            cursorRef.current.style.display = "none";
+          }
+        }
+      });
+
+      if (elapsed < duration) {
+        requestAnimationFrame(animate);
+      }
+    };
+
     requestAnimationFrame(animate);
   };
 
@@ -202,18 +214,19 @@ const PianoRollVisualizer = () => {
             <div style={{ position: 'relative' }}>
               <canvas id={`track-${track.index}`} style={{ display: 'block' }} />
              
-                <div
-                  ref={cursorRefs[i]}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    width: '2px',
-                    backgroundColor: 'red',
-                    height: '100%',
-                    display: 'none',
-                    zIndex: 10
-                  }}
-                />
+              <div
+                key={i}
+                ref={cursorRefs.current[i]}
+                style={{
+                  position: "absolute",
+                  top: `${i * 30}px`, // Separate cursors for each track
+                  left: "0px",
+                  width: "2px",
+                  height: "20px",
+                  backgroundColor: "red",
+                  display: "none",
+                }}
+              />
               
             </div>
           </div>
