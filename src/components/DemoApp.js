@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
 import { urlsObj } from '../data/notesUrl';
+import withContainer from '../hoc/withContainer';
 
 const NOTES_IN_OCTAVE = 12;
 const NOTE_HEIGHT = 20;
@@ -179,7 +180,7 @@ function DrumGridEditor({ drumNotes, onUpdateDrumNotes, playingStep }) {
   );
 }
 
-export default function MusicEditorDemo() {
+function MusicEditorDemo() {
   const [notes, setNotes] = useState([]);
   const [drumNotes, setDrumNotes] = useState([]);
   const [selectedInstrument, setSelectedInstrument] = useState('piano');
@@ -289,3 +290,6 @@ export default function MusicEditorDemo() {
     </div>
   );
 }
+
+
+export default withContainer(MusicEditorDemo);
