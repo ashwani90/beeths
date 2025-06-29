@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import * as Tone from 'tone';
 import { Midi } from '@tonejs/midi';
+import withContainer from '../hoc/withContainer';
 
 const MidiPlayer = () => {
   const [midiData, setMidiData] = useState(null);
@@ -90,4 +91,4 @@ const MidiPlayer = () => {
   );
 };
 
-export default MidiPlayer;
+export default withContainer(MidiPlayer);
