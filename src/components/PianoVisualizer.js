@@ -17,7 +17,7 @@ const PianoRollVisualizer = () => {
   const [midiName, setMidiName] = useState('');
   const sampler = usePianoSampler();
   const recorder = useRef(new Tone.Recorder());
-  const cursorRef = useRef(null);
+  const cursorRefs = useRef(tracks.map(() => React.createRef()));
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -107,25 +107,26 @@ const PianoRollVisualizer = () => {
           );
         }
       });
+      const cursor = cursorRefs[i].current;
+      cursor.style.left = '0px';
+      cursor.style.display = 'block';
+      const start = performance.now();
+    
+      const animate = (time) => {
+        const elapsed = (time - start) / 1000;
+        const x = elapsed * PIXELS_PER_SECOND;
+        cursor.style.left = `${x}px`;
+    
+        if (elapsed < duration) {
+          requestAnimationFrame(animate);
+        } else {
+          cursor.style.display = 'none';
+        }
+      };
     });
   
     // Cursor animation
-    const cursor = cursorRef.current;
-    cursor.style.left = '0px';
-    cursor.style.display = 'block';
-    const start = performance.now();
-  
-    const animate = (time) => {
-      const elapsed = (time - start) / 1000;
-      const x = elapsed * PIXELS_PER_SECOND;
-      cursor.style.left = `${x}px`;
-  
-      if (elapsed < duration) {
-        requestAnimationFrame(animate);
-      } else {
-        cursor.style.display = 'none';
-      }
-    };
+    
   
     requestAnimationFrame(animate);
   };
@@ -200,9 +201,9 @@ const PianoRollVisualizer = () => {
             <div className="font-semibold text-sm mb-1">{track.name}</div>
             <div style={{ position: 'relative' }}>
               <canvas id={`track-${track.index}`} style={{ display: 'block' }} />
-              {i === 0 && (
+             
                 <div
-                  ref={cursorRef}
+                  ref={cursorRefs[i]}
                   style={{
                     position: 'absolute',
                     top: 0,
@@ -213,7 +214,7 @@ const PianoRollVisualizer = () => {
                     zIndex: 10
                   }}
                 />
-              )}
+              
             </div>
           </div>
         ))}
