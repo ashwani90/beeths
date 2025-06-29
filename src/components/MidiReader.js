@@ -5,8 +5,9 @@ import playNotesTone from '../utils/playNotes';
 import * as Tone from 'tone';
 import { urlsObj } from '../data/notesUrl';
 import { exportToMidi } from '../utils/track';
+import withContainer from '../hoc/withContainer';
 
-export default function MidiVisualizer() {
+function MidiVisualizer() {
   const [notes, setNotes] = useState([]);
   const [allNotes, setAllNotes] = useState([]);
   const fileInputRef = useRef();
@@ -222,3 +223,5 @@ function DraggableNote({ note, minMidi, onDrag }) {
     </div>
   );
 }
+
+export default withContainer(MidiVisualizer);
