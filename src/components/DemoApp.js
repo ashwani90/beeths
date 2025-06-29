@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
 import { urlsObj } from '../data/notesUrl';
 import withContainer from '../hoc/withContainer';
+import usePlayNotes from '../hooks/playNotes';
 
 const NOTES_IN_OCTAVE = 12;
 const NOTE_HEIGHT = 20;
@@ -51,11 +52,12 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
       const duration = 0.5; // Default duration for a new note
   
       if (startTime >= 0 && midiNote >= 21 && midiNote <= 108) {
+        let time = startTime;
         onUpdateNotes([
           ...notes,
           {
             midi: midiNote,
-            startTime,
+            time,
             duration,
             instrument: selectedInstrument,
           },
@@ -92,8 +94,8 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
   
       // Draw notes
       const timeScale = 200;
-      notes.forEach(({ midi, startTime, duration, instrument }) => {
-        const x = KEY_WIDTH + startTime * timeScale;
+      notes.forEach(({ midi, time, duration, instrument }) => {
+        const x = KEY_WIDTH + time * timeScale;
         const y = height - (midi - 21 + 1) * NOTE_HEIGHT;
         const width = duration * timeScale;
   
@@ -188,8 +190,7 @@ function MusicEditorDemo() {
   const [playingStep, setPlayingStep] = useState(0);
   let synth = useRef(null);
   const drumSampler = useRef(null);
-  const pianoSampler = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { isPlaying, playNotes } = usePlayNotes();
 
   useEffect(() => {
     drumSampler.current = new Tone.Sampler({
@@ -201,33 +202,6 @@ function MusicEditorDemo() {
       },
     }).toDestination();
   }, []);
-
-  useEffect(() => {
-    pianoSampler.current = new Tone.Sampler({
-      urls: urlsObj,
-    }).toDestination();
-  }, []);
-
-  const playNotes = async () => {
-    if (isPlaying) return; // Prevent multiple playbacks
-    setIsPlaying(true);
-
-    await Tone.start();
-
-    const now = Tone.now();
-    console.log(notes);
-    notes.forEach(({ midi, startTime, duration }) => {
-      pianoSampler.current.triggerAttackRelease(
-        Tone.Frequency(midi, "midi"),
-        duration,
-        now + startTime
-      );
-    });
-
-    // Stop playback after the last note
-    const playbackDuration = Math.max(...notes.map((note) => note.startTime + note.duration));
-    setTimeout(() => setIsPlaying(false), playbackDuration * 1000);
-  };
 
   function playNotesAtTime(time) {
     notes.forEach(({ midi, startTime, duration, instrument }) => {
@@ -280,9 +254,9 @@ function MusicEditorDemo() {
       </div>
 
       <div style={{ marginTop: 20 }}>
-        <button onClick={playNotes} style={{ marginRight: 10 }}>
-          Play
-        </button>
+       <button onClick={() => playNotes(notes)} disabled={isPlaying}>
+        {isPlaying ? "Playing..." : "Play Notes"}
+      </button>
         <button onClick={stopPlayback}>Stop</button>
         <button >Export To Midi</button>
         <button >Export To Audio</button>
