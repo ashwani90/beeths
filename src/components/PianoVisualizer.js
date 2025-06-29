@@ -4,6 +4,7 @@ import * as Tone from 'tone';
 import { exportToMidi } from '../utils/track';
 import usePianoSampler from '../hooks/usePianoSample';
 import exportToAudio from '../utils/audio';
+import withContainer from '../hoc/withContainer';
 
 const NOTE_HEIGHT = 8;
 const PIXELS_PER_SECOND = 100;
@@ -243,4 +244,4 @@ const PianoRollVisualizer = () => {
   );
 };
 
-export default PianoRollVisualizer;
+export default withContainer(PianoRollVisualizer);
