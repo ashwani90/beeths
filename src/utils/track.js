@@ -19,37 +19,27 @@ export const groupByInstrument = (notes) => {
 
 
   
-  export const exportToMidi = (tracks, index=0) => {
+  export const exportToMidi = (tracks) => {
     const midi = new Midi();
   
-    tracks.forEach((track, index) => {
+    // Loop through each track
+    tracks.forEach((track, trackIndex) => {
       const midiTrack = midi.addTrack();
-      midiTrack.name = track.name || `Track ${index + 1}`;
-      midiTrack.channel = index % 16; // MIDI has 16 channels (0–15)
+      midiTrack.name = track.name || `Track ${trackIndex + 1}`;
+      midiTrack.channel = trackIndex % 16; // MIDI supports 16 channels (0–15)
   
+      // Add notes to the track
       track.notes.forEach(note => {
-        if (index==0) {
-          midiTrack.addNote({
-            midi: note.midi,
-            time: note.time,
-            duration: note.duration,
-            velocity: note.velocity ?? 0.8, // Default if not set
-          });
-        } else {
-          let target = parseInt(note.time/10);
-          if (target == index) {
-            midiTrack.addNote({
-              midi: note.midi,
-              time: note.time,
-              duration: note.duration,
-              velocity: note.velocity ?? 0.8, // Default if not set
-            });
-          }
-        }
-        
+        midiTrack.addNote({
+          midi: note.midi,
+          time: note.time,
+          duration: note.duration,
+          velocity: note.velocity ?? 0.8, // Default if not provided
+        });
       });
     });
   
+    // Convert MIDI to a Blob and save
     const bytes = midi.toArray();
     const blob = new Blob([bytes], { type: 'audio/midi' });
     saveAs(blob, 'exported_song.mid');
