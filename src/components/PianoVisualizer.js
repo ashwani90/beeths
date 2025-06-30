@@ -5,10 +5,7 @@ import { exportToMidi } from '../utils/track';
 import usePianoSampler from '../hooks/usePianoSample';
 import exportToAudio from '../utils/audio';
 import withContainer from '../hoc/withContainer';
-
-const NOTE_HEIGHT = 8;
-const PIXELS_PER_SECOND = 100;
-
+import { drawTrack } from '../utils/track';
 
 
 const PianoRollVisualizer = () => {
@@ -40,71 +37,30 @@ const PianoRollVisualizer = () => {
 
   useEffect(() => {
     // Initialize refs dynamically based on tracks length
-    cursorRefs.current = tracks.map(() => React.createRef());
+    cursorRefs.current = Array.from({ length: tracks.length }, () => React.createRef());
   }, [tracks]);
-
-  const drawTrack = (canvas, notes, color) => {
-    const ctx = canvas.getContext('2d');
-    const width = duration * PIXELS_PER_SECOND;
-    const minPitch = 21;
-    const maxPitch = 108;
-    const height = (maxPitch - minPitch + 1) * NOTE_HEIGHT;
-    let unique_notes = [];
-  
-    canvas.width = width;
-    canvas.height = height;
-  
-    ctx.clearRect(0, 0, width, height);
-    ctx.font = '10px sans-serif';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = color;
-  
-    notes.forEach(note => {
-      const x = note.time * PIXELS_PER_SECOND;
-      const y = (maxPitch - note.midi) * NOTE_HEIGHT;
-      const w = note.duration * PIXELS_PER_SECOND;
-      const h = NOTE_HEIGHT;
-  
-      // Draw the note rectangle
-      ctx.fillStyle = color;
-      ctx.fillRect(x, y, w, h);
-  
-      // Draw the note label
-      ctx.fillStyle = 'black';
-
-      const label = midiToNoteName(note.midi);
-      if (!unique_notes.includes(label)) {
-        unique_notes.push(label);
-        }
-      ctx.fillText(label, x + 2, y + h / 2); // small padding inside the box
-    });
-    console.log(unique_notes);
-  };
-
-  
-  // Converts MIDI number to note name (e.g., 60 -> C4)
-  const midiToNoteName = (midi) => {
-    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    const octave = Math.floor(midi / 12) - 1;
-    const note = notes[midi % 12];
-    return `${note}${octave}`;
-  };
   
 
   const play = async () => {
     await Tone.start();
+    console.log(cursorRefs);
   
     const now = Tone.now();
   
     // Use your custom sampler for all tracks
     const synths = tracks.map(() => sampler); // Replace PolySynth with your sampler
   
-    tracks.forEach((track, i) => {
+    // Calculate the total duration dynamically
+    let totalDuration = 0;
+    tracks.forEach((track) => {
       track.notes.forEach(note => {
-        console.log("triggered note ", now + note.time, "For duration", note.duration, "with velocity", note.velocity);
+        const endTime = note.time + note.duration;
+        if (endTime > totalDuration) {
+          totalDuration = endTime;
+        }
         // Ensure sampler is loaded before triggering
-        if (synths[i] && note.midi) {
-          synths[i].triggerAttackRelease(
+        if (synths[tracks.indexOf(track)] && note.midi) {
+          synths[tracks.indexOf(track)].triggerAttackRelease(
             Tone.Frequency(note.midi, 'midi'),
             note.duration,
             now + note.time,
@@ -112,36 +68,36 @@ const PianoRollVisualizer = () => {
           );
         }
       });
-      
     });
   
+    // Pixels per second for cursor animation
     const PIXELS_PER_SECOND = 100;
-    const duration = 5; // seconds
-
+  
     const start = performance.now();
-
+  
     const animate = (time) => {
       const elapsed = (time - start) / 1000;
       const x = elapsed * PIXELS_PER_SECOND;
-
+  
+      // Update cursor position for each track
       cursorRefs.current.forEach((cursorRef) => {
-        if (cursorRef.current) {
-          if (elapsed < duration) {
-            cursorRef.current.style.left = `${x}px`;
-            cursorRef.current.style.display = "block";
+        if (cursorRef) {
+          if (elapsed < totalDuration) {
+            cursorRef.style.left = `${x}px`;
+            cursorRef.style.display = "block";
           } else {
-            cursorRef.current.style.display = "none";
+            cursorRef.style.display = "none";
           }
         }
       });
-
-      if (elapsed < duration) {
+  
+      if (elapsed < totalDuration) {
         requestAnimationFrame(animate);
       }
     };
-
+  
     requestAnimationFrame(animate);
-  };
+  };  
 
   
   const exportToWav = async (tracks) => {
@@ -193,10 +149,9 @@ const PianoRollVisualizer = () => {
 
   useEffect(() => {
     tracks.forEach(track => {
-        console.log(track);
       const canvas = document.getElementById(`track-${track.index}`);
       if (canvas) {
-        drawTrack(canvas, track.notes, track.color);
+        drawTrack(canvas, track.notes, track.color, duration);
       }
     });
   }, [tracks]);
@@ -216,13 +171,13 @@ const PianoRollVisualizer = () => {
              
               <div
                 key={i}
-                ref={cursorRefs.current[i]}
+                ref={(el) => (cursorRefs.current[i] = el)} 
                 style={{
                   position: "absolute",
                   top: `${i * 30}px`, // Separate cursors for each track
                   left: "0px",
                   width: "2px",
-                  height: "20px",
+                  height: "704px",
                   backgroundColor: "red",
                   display: "none",
                 }}
