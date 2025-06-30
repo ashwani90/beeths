@@ -66,7 +66,7 @@ export const groupByInstrument = (notes) => {
       const lowestTime = notes.reduce((min, note) => Math.min(min, note.time), Infinity);
       console.log("Lowest time:", lowestTime);
       notes.forEach(note => {
-        const x = note.time * PIXELS_PER_SECOND - lowestTime * PIXELS_PER_SECOND; // Adjust x position based on lowest time
+        const x = note.time * PIXELS_PER_SECOND - lowestTime * PIXELS_PER_SECOND;
         const y = (maxPitch - note.midi) * NOTE_HEIGHT;
         const w = (note.duration * PIXELS_PER_SECOND);
         const h = NOTE_HEIGHT;
