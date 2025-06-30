@@ -17,7 +17,7 @@ const PianoRollVisualizer = () => {
   const [midiName, setMidiName] = useState('');
   const sampler = usePianoSampler();
   const recorder = useRef(new Tone.Recorder());
-  let cursorRefs = useRef([]);
+  const cursorRefs = useRef([]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
