@@ -6,7 +6,21 @@ import usePianoSampler from '../hooks/usePianoSample';
 import exportToAudio from '../utils/audio';
 import withContainer from '../hoc/withContainer';
 import { drawTrack } from '../utils/track';
+import Button from './common/Button';
+import FileInput from './common/FileInput';
 
+const containerStyles = {
+  display: "flex",
+  flexDirection: "row",
+  justifyContent: "space-evenly",
+  alignItems: "center",
+  padding: "10px",
+  gap: "6px", // Spacing between buttons
+  background: "#fff",
+  borderRadius: "12px",
+  width: "fit-content",
+  margin: "auto",
+};
 
 const PianoRollVisualizer = () => {
   const [tracks, setTracks] = useState([]);
@@ -159,7 +173,7 @@ const PianoRollVisualizer = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-2">🎼 Multi-Track Piano Roll</h2>
-      <input type="file" accept=".mid" onChange={handleFileUpload} className="mb-4" />
+      <FileInput onChange={handleFileUpload}/>
       {midiName && <div className="mb-2">Loaded: {midiName}</div>}
 
       <div style={{ position: 'relative', overflowX: 'auto', border: '1px solid #ccc' }}>
@@ -187,27 +201,22 @@ const PianoRollVisualizer = () => {
           </div>
         ))}
       </div>
-
+      <div style={containerStyles}>
       {tracks.length > 0 && (
-        <button
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+        <Button
+        label="▶ Play"
           onClick={play}
-        >
-          ▶ Play
-        </button>
+        />
       )}
-      <button
-        className="mt-2 ml-2 px-4 py-2 bg-green-600 text-white rounded"
+      <Button
+      label='💾 Export MIDI'
         onClick={() => exportToMidi(tracks, 0)}
-        >
-        💾 Export MIDI
-        </button>
-        <button
-        className="mt-2 ml-2 px-4 py-2 bg-blue-600 text-white rounded"
+        />
+        <Button
+        label='🎤 Export WAV'
         onClick={() => exportToWav(tracks)}
-      >
-        🎵 Export MP3
-      </button>
+      />
+      </div>
         
     </div>
   );
