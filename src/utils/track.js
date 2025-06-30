@@ -1,5 +1,7 @@
 import { Midi } from '@tonejs/midi';
 import { saveAs } from 'file-saver'; // install via: npm install file-saver
+import { PIXELS_PER_SECOND, NOTE_HEIGHT } from '../constants/music';
+import { midiToNoteName } from './midi';
 
 export const groupByInstrument = (notes) => {
     const map = {};
@@ -45,3 +47,44 @@ export const groupByInstrument = (notes) => {
     saveAs(blob, 'exported_song.mid');
   };
   
+
+  export const drawTrack = (canvas, notes, color, duration) => {
+      const ctx = canvas.getContext('2d');
+      const width = duration * PIXELS_PER_SECOND;
+      const minPitch = 21;
+      const maxPitch = 108;
+      const height = (maxPitch - minPitch + 1) * NOTE_HEIGHT;
+      let unique_notes = [];
+    
+      canvas.width = width;
+      canvas.height = height;
+    
+      ctx.clearRect(0, 0, width, height);
+      ctx.font = '10px sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = color;
+      const lowestTime = notes.reduce((min, note) => Math.min(min, note.time), Infinity);
+      console.log("Lowest time:", lowestTime);
+      notes.forEach(note => {
+        const x = note.time * PIXELS_PER_SECOND - lowestTime * PIXELS_PER_SECOND; // Adjust x position based on lowest time
+        const y = (maxPitch - note.midi) * NOTE_HEIGHT;
+        const w = (note.duration * PIXELS_PER_SECOND);
+        const h = NOTE_HEIGHT;
+        console.log("x is ", x);
+    
+        // Draw the note rectangle
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, w, h);
+    
+        // Draw the note label
+        ctx.fillStyle = 'black';
+  
+        const label = midiToNoteName(note.midi);
+        console.log(label);
+        if (!unique_notes.includes(label)) {
+          unique_notes.push(label);
+          }
+        ctx.fillText(label, x + 2, y + h / 2); // small padding inside the box
+      });
+      console.log(unique_notes);
+    };
