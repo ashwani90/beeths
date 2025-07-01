@@ -8,19 +8,7 @@ import withContainer from '../hoc/withContainer';
 import { drawTrack } from '../utils/track';
 import Button from './common/Button';
 import FileInput from './common/FileInput';
-
-const containerStyles = {
-  display: "flex",
-  flexDirection: "row",
-  justifyContent: "space-evenly",
-  alignItems: "center",
-  padding: "10px",
-  gap: "6px", // Spacing between buttons
-  background: "#fff",
-  borderRadius: "12px",
-  width: "fit-content",
-  margin: "auto",
-};
+import { buttonContainerStyles } from '../styles/buttonContainer';
 
 const PianoRollVisualizer = () => {
   const [tracks, setTracks] = useState([]);
@@ -201,7 +189,7 @@ const PianoRollVisualizer = () => {
           </div>
         ))}
       </div>
-      <div style={containerStyles}>
+      <div style={buttonContainerStyles}>
       {tracks.length > 0 && (
         <Button
         label="▶ Play"
