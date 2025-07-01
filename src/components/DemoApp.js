@@ -13,7 +13,7 @@ const PIANO_KEYS = 88;
 const KEY_WIDTH = 40;
 const INSTRUMENTS = ['piano', 'drums', 'violin'];
 const instrumentColors = {
-  piano: '#007bff',
+  piano: '#4169E1',
   drums: '#dc3545',
   violin: '#28a745',
 };
@@ -82,7 +82,7 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
         const isBlackKey = [1, 3, 6, 8, 10].includes(midiNote % 12);
         ctx.fillStyle = isBlackKey ? '#444' : '#eee';
         ctx.fillRect(0, y, KEY_WIDTH, NOTE_HEIGHT);
-        ctx.strokeStyle = '#999';
+        ctx.strokeStyle = 'cyan';
         ctx.strokeRect(0, y, KEY_WIDTH, NOTE_HEIGHT);
   
         if (playingNotes.includes(midiNote)) {
@@ -104,7 +104,7 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
   
         ctx.fillStyle = instrumentColors[instrument] || 'gray';
         ctx.fillRect(x, y, width, NOTE_HEIGHT - 2);
-        ctx.strokeStyle = 'black';
+        ctx.strokeStyle = 'white';
         ctx.strokeRect(x, y, width, NOTE_HEIGHT - 2);
       });
     }, [notes, playingNotes]);
@@ -171,7 +171,7 @@ function DrumGridEditor({ drumNotes, onUpdateDrumNotes, playingStep }) {
                       border: '1px solid black',
                       padding: 5,
                       cursor: 'pointer',
-                      backgroundColor: active ? `rgba(220, 53, 69, ${active.velocity})` : '#fff',
+                      backgroundColor: active ? `rgba(102, 178, 155, ${active.velocity})` : '#fff',
                     }}
                     onClick={() => toggleStep(midi, step)}
                   />
