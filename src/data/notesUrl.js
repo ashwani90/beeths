@@ -95,3 +95,15 @@ export const urlsObj = {
     "G#6": window.location.origin + '/samples/test/Ab6.mp3',
     "G#7": window.location.origin + '/samples/test/Ab7.mp3',
   }
+
+  // Map keyboard keys to MIDI notes for piano (subset)
+const pianoKeyMap = {
+  KeyA: 60, // C4
+  KeyS: 62, // D4
+  KeyD: 64, // E4
+  KeyF: 65, // F4
+  KeyG: 67, // G4
+  KeyH: 69, // A4
+  KeyJ: 71, // B4
+  KeyK: 72, // C5
+};
