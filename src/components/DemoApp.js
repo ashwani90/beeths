@@ -3,6 +3,9 @@ import * as Tone from 'tone';
 import { urlsObj } from '../data/notesUrl';
 import withContainer from '../hoc/withContainer';
 import usePlayNotes from '../hooks/playNotes';
+import Button from './common/Button';
+import { buttonContainerStyles } from '../styles/buttonContainer';
+import Select from './common/Select';
 
 const NOTES_IN_OCTAVE = 12;
 const NOTE_HEIGHT = 20;
@@ -234,16 +237,11 @@ function MusicEditorDemo() {
   return (
     <div style={{ padding: 20, fontFamily: 'Arial' }}>
       <h2>Music Editor Demo with Tone.js</h2>
-      <div>
-        <label>Select Instrument: </label>
-        <select value={selectedInstrument} onChange={(e) => setSelectedInstrument(e.target.value)}>
-          {INSTRUMENTS.map((inst) => (
-            <option key={inst} value={inst}>
-              {inst}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Select
+        selectedInstrument={selectedInstrument}
+        setSelectedInstrument={setSelectedInstrument}
+        INSTRUMENTS={INSTRUMENTS}
+      />
 
       <div style={{ marginTop: 20 }}>
         {selectedInstrument === 'drums' ? (
@@ -253,13 +251,11 @@ function MusicEditorDemo() {
         )}
       </div>
 
-      <div style={{ marginTop: 20 }}>
-       <button onClick={() => playNotes(notes)} disabled={isPlaying}>
-        {isPlaying ? "Playing..." : "Play Notes"}
-      </button>
-        <button onClick={stopPlayback}>Stop</button>
-        <button >Export To Midi</button>
-        <button >Export To Audio</button>
+      <div style={buttonContainerStyles}>
+        <Button onClick={() => playNotes(notes)} disabled={isPlaying} label={isPlaying ? "Playing..." : "Play Notes"} />
+        <Button onClick={stopPlayback} label="Stop" />
+        <Button label="Export To Midi" />
+        <Button label="Export To Audio" />
       </div>
     </div>
   );
