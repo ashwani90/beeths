@@ -8,5 +8,4 @@ export const buttonContainerStyles = {
     background: "#fff",
     borderRadius: "12px",
     width: "fit-content",
-    margin: "auto",
   };
