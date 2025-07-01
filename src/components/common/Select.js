@@ -4,13 +4,11 @@ const containerStyles = {
   display: "flex",
   flexDirection: "column",
   alignItems: "flex-start",
+  justifyContent: "start",
   gap: "8px",
-  padding: "20px",
   background: "#fff",
-  border: "2px solid #000",
   borderRadius: "12px",
   width: "fit-content",
-  margin: "auto",
 };
 
 const labelStyles = {
