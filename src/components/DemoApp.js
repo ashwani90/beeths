@@ -6,29 +6,13 @@ import usePlayNotes from '../hooks/playNotes';
 import Button from './common/Button';
 import { buttonContainerStyles } from '../styles/buttonContainer';
 import Select from './common/Select';
+import { instrumentColors } from '../data/colors';
 
 const NOTES_IN_OCTAVE = 12;
 const NOTE_HEIGHT = 20;
 const PIANO_KEYS = 88;
 const KEY_WIDTH = 40;
 const INSTRUMENTS = ['piano', 'drums', 'violin'];
-const instrumentColors = {
-  piano: '#4169E1',
-  drums: '#dc3545',
-  violin: '#28a745',
-};
-
-// Map keyboard keys to MIDI notes for piano (subset)
-const pianoKeyMap = {
-  KeyA: 60, // C4
-  KeyS: 62, // D4
-  KeyD: 64, // E4
-  KeyF: 65, // F4
-  KeyG: 67, // G4
-  KeyH: 69, // A4
-  KeyJ: 71, // B4
-  KeyK: 72, // C5
-};
 
 // Drum step grid config
 const DRUM_STEPS = 16;
