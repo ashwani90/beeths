@@ -83,14 +83,13 @@ function MidiVisualizer() {
   
           return (
             <div key={index}>
-              <h4>{group.instrument} (Track {group.track + 1})</h4>
+              <h4 style={{ padding: "20px", borderBottom: "1px solid black" }}>{group.instrument} (Track {group.track + 1})</h4>
               <div
                 style={{
                   position: 'relative',
                   width: maxTime * 100 + 'px',
                   height: (maxMidi - minMidi + 1) * 20 + 'px',
-                  border: '1px solid #ccc',
-                  overflowX: 'auto',
+                  padding: "20px",
                 }}
               >
                 {group.notes.map(note => (
@@ -116,7 +115,7 @@ function MidiVisualizer() {
     <div style={{ margin: '20px', padding: "20px", overflow: 'auto' }}>
       <h2>MIDI File Visualizer with Note Editing</h2>
       <FileInput ref={fileInputRef}  handleFileUpload={handleFileChange}/>
-      <div style={{ margin: '20px', padding: "10px", overflow: 'auto', border: '1px solid black' }}>
+      <div style={{ margin: '20px', padding: "10px", overflow: 'scroll', border: '1px solid black' }}>
         {notes.length > 0 ? renderPianoRoll() : <p>Upload a MIDI file to see notes.</p>}
       </div>
       <div style={buttonContainerStyles}>
