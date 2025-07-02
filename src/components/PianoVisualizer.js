@@ -10,7 +10,7 @@ import Button from './common/Button';
 import FileInput from './common/FileInput';
 import { buttonContainerStyles } from '../styles/buttonContainer';
 
-const PianoRollVisualizer = () => {
+const PianoVisualizer = () => {
   const [tracks, setTracks] = useState([]);
   const [duration, setDuration] = useState(0);
   const [midiName, setMidiName] = useState('');
@@ -19,6 +19,7 @@ const PianoRollVisualizer = () => {
   const cursorRefs = useRef([]);
 
   const handleFileUpload = async (e) => {
+    console.log("Going inside it");
     const file = e.target.files[0];
     if (!file) return;
 
@@ -161,7 +162,7 @@ const PianoRollVisualizer = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-2">🎼 Multi-Track Piano Roll</h2>
-      <FileInput onChange={handleFileUpload}/>
+      <FileInput handleFileUpload={handleFileUpload}/>
       {midiName && <div className="mb-2">Loaded: {midiName}</div>}
 
       <div style={{ position: 'relative', overflowX: 'auto', border: '1px solid #ccc' }}>
@@ -210,4 +211,4 @@ const PianoRollVisualizer = () => {
   );
 };
 
-export default withContainer(PianoRollVisualizer);
+export default withContainer(PianoVisualizer);
