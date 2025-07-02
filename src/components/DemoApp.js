@@ -1,173 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
-import { urlsObj } from '../data/notesUrl';
 import withContainer from '../hoc/withContainer';
 import usePlayNotes from '../hooks/playNotes';
 import Button from './common/Button';
 import { buttonContainerStyles } from '../styles/buttonContainer';
 import Select from './common/Select';
-import { instrumentColors } from '../data/colors';
-
-const NOTES_IN_OCTAVE = 12;
-const NOTE_HEIGHT = 20;
-const PIANO_KEYS = 88;
-const KEY_WIDTH = 40;
-const INSTRUMENTS = ['piano', 'drums', 'violin'];
-
-// Drum step grid config
-const DRUM_STEPS = 16;
-const DRUM_NOTES = [36, 38, 42, 46]; // Kick, Snare, Closed HiHat, Open HiHat
-
-function midiToNoteName(midi) {
-  const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const octave = Math.floor(midi / 12) - 1;
-  const note = noteNames[midi % 12];
-  return note + octave;
-}
-
-function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNotes }) {
-    const canvasRef = useRef(null);
-  
-    const handleMouseClick = (event) => {
-      const canvas = canvasRef.current;
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
-      const mouseY = event.clientY - rect.top;
-  
-      const midiNote = 21 + Math.floor((canvas.height - mouseY) / NOTE_HEIGHT);
-      const startTime = (mouseX - KEY_WIDTH) / 200; // 200 is the time scale factor
-      const duration = 0.5; // Default duration for a new note
-  
-      if (startTime >= 0 && midiNote >= 21 && midiNote <= 108) {
-        let time = startTime;
-        onUpdateNotes([
-          ...notes,
-          {
-            midi: midiNote,
-            time,
-            duration,
-            instrument: selectedInstrument,
-          },
-        ]);
-      }
-    };
-  
-    useEffect(() => {
-      const ctx = canvasRef.current.getContext('2d');
-      const width = canvasRef.current.width;
-      const height = canvasRef.current.height;
-  
-      ctx.clearRect(0, 0, width, height);
-  
-      // Draw piano keys vertically
-      for (let i = 0; i < PIANO_KEYS; i++) {
-        const midiNote = 21 + i;
-        const y = height - (i + 1) * NOTE_HEIGHT;
-        const isBlackKey = [1, 3, 6, 8, 10].includes(midiNote % 12);
-        ctx.fillStyle = isBlackKey ? '#444' : '#eee';
-        ctx.fillRect(0, y, KEY_WIDTH, NOTE_HEIGHT);
-        ctx.strokeStyle = 'cyan';
-        ctx.strokeRect(0, y, KEY_WIDTH, NOTE_HEIGHT);
-  
-        if (playingNotes.includes(midiNote)) {
-          ctx.fillStyle = 'yellow';
-          ctx.fillRect(0, y, KEY_WIDTH, NOTE_HEIGHT);
-        }
-  
-        ctx.fillStyle = 'black';
-        ctx.font = '10px Arial';
-        ctx.fillText(midiToNoteName(midiNote), 5, y + 14);
-      }
-  
-      // Draw notes
-      const timeScale = 200;
-      notes.forEach(({ midi, time, duration, instrument }) => {
-        const x = KEY_WIDTH + time * timeScale;
-        const y = height - (midi - 21 + 1) * NOTE_HEIGHT;
-        const width = duration * timeScale;
-  
-        ctx.fillStyle = instrumentColors[instrument] || 'gray';
-        ctx.fillRect(x, y, width, NOTE_HEIGHT - 2);
-        ctx.strokeStyle = 'white';
-        ctx.strokeRect(x, y, width, NOTE_HEIGHT - 2);
-      });
-    }, [notes, playingNotes]);
-  
-    return (
-      <canvas
-        ref={canvasRef}
-        width={1000}
-        height={PIANO_KEYS * NOTE_HEIGHT}
-        style={{ border: '1px solid black', cursor: 'pointer' }}
-        onClick={handleMouseClick}
-      />
-    );
-  }
-  
-
-function DrumGridEditor({ drumNotes, onUpdateDrumNotes, playingStep }) {
-  const [velocity, setVelocity] = useState(0.7);
-
-  function toggleStep(midi, step) {
-    const found = drumNotes.find((n) => n.midi === midi && n.step === step);
-    if (found) {
-      onUpdateDrumNotes(drumNotes.filter((n) => !(n.midi === midi && n.step === step)));
-    } else {
-      onUpdateDrumNotes([...drumNotes, { midi, step, velocity }]);
-    }
-  }
-
-  return (
-    <div>
-      <h3>Drum Grid Editor</h3>
-      <div style={{ marginBottom: 10 }}>
-        <label>Velocity: </label>
-        <input
-          type="range"
-          min={0.1}
-          max={1}
-          step={0.05}
-          value={velocity}
-          onChange={(e) => setVelocity(parseFloat(e.target.value))}
-        />
-      </div>
-      <table style={{ borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th>Instrument</th>
-            {[...Array(DRUM_STEPS).keys()].map((step) => (
-              <th key={step} style={{ border: '1px solid black', padding: 5 }}>
-                {step + 1}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {DRUM_NOTES.map((midi) => (
-            <tr key={midi}>
-              <td style={{ border: '1px solid black', padding: 5 }}>{midiToNoteName(midi)}</td>
-              {[...Array(DRUM_STEPS).keys()].map((step) => {
-                const active = drumNotes.find((n) => n.midi === midi && n.step === step);
-                return (
-                  <td
-                    key={step}
-                    style={{
-                      border: '1px solid black',
-                      padding: 5,
-                      cursor: 'pointer',
-                      backgroundColor: active ? `rgba(102, 178, 155, ${active.velocity})` : '#fff',
-                    }}
-                    onClick={() => toggleStep(midi, step)}
-                  />
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+import DrumGridEditor from './editors/DrumGridEditor';
+import { DRUM_STEPS, INSTRUMENTS } from '../constants/music';
+import PianoRollEditor from './editors/PianoRollEditor';
 
 function MusicEditorDemo() {
   const [notes, setNotes] = useState([]);
@@ -189,35 +29,7 @@ function MusicEditorDemo() {
       },
     }).toDestination();
   }, []);
-
-  function playNotesAtTime(time) {
-    notes.forEach(({ midi, startTime, duration, instrument }) => {
-      if (startTime >= time && startTime < time + 0.25) {
-        synth.triggerAttackRelease(Tone.Frequency(midi, "midi"), duration);
-      }
-    });
-
-    drumNotes.forEach(({ midi, step }) => {
-      if (step === playingStep) {
-        drumSampler.current.triggerAttackRelease(Tone.Frequency(midi, "midi"));
-      }
-    });
-  }
-
-  function startPlayback() {
-    Tone.start();
-    Tone.Transport.scheduleRepeat((time) => {
-      setPlayingStep((prev) => (prev + 1) % DRUM_STEPS);
-      playNotesAtTime(time);
-    }, "16n");
-    Tone.Transport.start();
-  }
-
-  function stopPlayback() {
-    Tone.Transport.stop();
-    setPlayingStep(0);
-  }
-
+  
   return (
     <div style={{ padding: 20, fontFamily: 'Arial' }}>
       <h2>Music Editor Demo with Tone.js</h2>
@@ -237,7 +49,7 @@ function MusicEditorDemo() {
 
       <div style={buttonContainerStyles}>
         <Button onClick={() => playNotes(notes)} disabled={isPlaying} label={isPlaying ? "Playing..." : "Play Notes"} />
-        <Button onClick={stopPlayback} label="Stop" />
+        <Button onClick={() => console.log("Unable to stop for now")} label="Stop" />
         <Button label="Export To Midi" />
         <Button label="Export To Audio" />
       </div>
