@@ -2,10 +2,11 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Midi } from '@tonejs/midi';
 import { groupByInstrument } from '../utils/track';
 import usePlayNotes from '../hooks/playNotes';
-import * as Tone from 'tone';
-import { urlsObj } from '../data/notesUrl';
 import { exportToMidi } from '../utils/track';
 import withContainer from '../hoc/withContainer';
+import Button from './common/Button';
+import FileInput from './common/FileInput';
+import { buttonContainerStyles } from '../styles/buttonContainer';
 
 function MidiVisualizer() {
   const [notes, setNotes] = useState([]);
@@ -114,19 +115,24 @@ function MidiVisualizer() {
   return (
     <div style={{ margin: '20px', padding: "10px", overflow: 'auto', border: '3px solid black' }}>
       <h2>MIDI File Visualizer with Note Editing</h2>
-      <input type="file" accept=".mid,.midi" ref={fileInputRef} onChange={handleFileChange} />
+      <FileInput ref={fileInputRef}  handleFileUpload={handleFileChange}/>
       <div style={{ margin: '20px', padding: "10px", overflow: 'auto', border: '1px solid black' }}>
         {notes.length > 0 ? renderPianoRoll() : <p>Upload a MIDI file to see notes.</p>}
       </div>
-      <button onClick={() => playNotes(notes)} disabled={isPlaying}>
-        {isPlaying ? "Playing..." : "Play Notes"}
-      </button>
-        <button onClick={() => exportToMidi(tracks, 10)} style={{ marginRight: 10 }}>
-          Export To Midi
-        </button>
-        <button  style={{ marginRight: 10 }}>
-          Export To Audio
-        </button>
+      <div style={buttonContainerStyles}>
+      <Button
+        label={isPlaying ? "Playing..." : "Play Notes"}
+        onClick={() => playNotes(notes)} disabled={isPlaying}
+        />
+        <Button
+      label='Export To Midi'
+      onClick={() => exportToMidi(tracks, 10)} 
+        />
+      <Button
+        label='Export To Audio'
+        onClick={() => console.log("Export to audio not implemented yet")}
+      />
+        </div>
     </div>
   );
 }
