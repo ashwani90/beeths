@@ -113,7 +113,7 @@ function MidiVisualizer() {
   
 
   return (
-    <div style={{ margin: '20px', padding: "10px", overflow: 'auto', border: '3px solid black' }}>
+    <div style={{ margin: '20px', padding: "20px", overflow: 'auto' }}>
       <h2>MIDI File Visualizer with Note Editing</h2>
       <FileInput ref={fileInputRef}  handleFileUpload={handleFileChange}/>
       <div style={{ margin: '20px', padding: "10px", overflow: 'auto', border: '1px solid black' }}>
