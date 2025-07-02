@@ -21,3 +21,19 @@ const playNotesTone = async (notes, pianoSampler, setIsPlaying) => {
   };
 
 export default playNotesTone;
+
+// Defferred function
+
+function playNotesAtTime(time) {
+  notes.forEach(({ midi, startTime, duration, instrument }) => {
+    if (startTime >= time && startTime < time + 0.25) {
+      synth.triggerAttackRelease(Tone.Frequency(midi, "midi"), duration);
+    }
+  });
+
+  drumNotes.forEach(({ midi, step }) => {
+    if (step === playingStep) {
+      drumSampler.current.triggerAttackRelease(Tone.Frequency(midi, "midi"));
+    }
+  });
+}
