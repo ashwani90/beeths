@@ -1,10 +1,9 @@
 import React, {useState} from 'react';
-import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MusicEditorDemo from './components/DemoApp';
 import MidiVisualizer from './components/MidiReader';
 import MidiPlayer from './components/MidiPlayer';
-import PianoRollVisualizer from './components/PianoVisualizer';
+import PianoVisualizer from './components/PianoVisualizer';
 import Navbar from './components/Navbar';
 import NotFound from './components/NotFound';
 
@@ -15,7 +14,7 @@ function App() {
       <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<PianoRollVisualizer />} />
+        <Route path="/" element={<PianoVisualizer />} />
         <Route path="/demo" element={<MusicEditorDemo />} />
         <Route path="/visualizer" element={<MidiVisualizer />} />
         <Route path="/player" element={<MidiPlayer />} />
