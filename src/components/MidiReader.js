@@ -1,18 +1,20 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Midi } from '@tonejs/midi';
-import { groupByInstrument } from '../utils/track';
 import usePlayNotes from '../hooks/playNotes';
 import { exportToMidi } from '../utils/track';
 import withContainer from '../hoc/withContainer';
 import Button from './common/Button';
 import FileInput from './common/FileInput';
 import { buttonContainerStyles } from '../styles/buttonContainer';
+import renderPianoRoll from './PianoRollComp';
+import * as Tone from 'tone';
 
 function MidiVisualizer() {
   const [notes, setNotes] = useState([]);
   const [allNotes, setAllNotes] = useState([]);
   const fileInputRef = useRef();
   const [tracks, setTracks] = useState([]);
+  const [midiName, setMidiName] = useState('');
   const { isPlaying, playNotes } = usePlayNotes();
 
   const handleFileChange = async (event) => {
@@ -45,7 +47,54 @@ function MidiVisualizer() {
     setTracks(midi.tracks);
     setNotes(extractedNotes[0]);
     setAllNotes(extractedNotes);
+    setMidiName(file.name);
   };
+
+  const exportToWav = async (tracks) => {
+      await Tone.start();
+  
+      const recorder = new Tone.Recorder();
+      const synth = new Tone.PolySynth(Tone.Synth).connect(recorder);
+      recorder.start();
+  
+      const now = Tone.now();
+  
+      tracks.forEach((track) => {
+        track.notes.forEach((note) => {
+          synth.triggerAttackRelease(
+            Tone.Frequency(note.midi, "midi"),
+            note.duration,
+            now + note.time
+          );
+        });
+      });
+  
+      Tone.Transport.start();
+  
+      // Wait for playback duration
+      const playbackDuration = tracks.reduce((max, track) => {
+        const lastNote = track.notes[track.notes.length - 1];
+        return Math.max(max, lastNote.time + lastNote.duration);
+      }, 0);
+  
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          Tone.Transport.stop();
+          resolve();
+        }, (playbackDuration + 0.5) * 1000)
+      );
+  
+      // Stop recording and save the file
+      const recording = await recorder.stop();
+      const blob = new Blob([recording], { type: "audio/wav" });
+      const url = URL.createObjectURL(blob);
+  
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${midiName || "output"}.wav`;
+      link.click();
+      URL.revokeObjectURL(url);
+    };
 
   const handleDrag = (id, deltaX, deltaY, isResize) => {
     setNotes(prev =>
@@ -71,52 +120,12 @@ function MidiVisualizer() {
     );
   };
 
-  const renderPianoRoll = () => {
-    const groupedTracks = groupByInstrument(notes);
-  
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        {groupedTracks.map((group, index) => {
-          const maxTime = Math.max(...group.notes.map(n => n.time + n.duration));
-          const minMidi = Math.min(...group.notes.map(n => n.midi));
-          const maxMidi = Math.max(...group.notes.map(n => n.midi));
-  
-          return (
-            <div key={index}>
-              <h4 style={{ padding: "20px", borderBottom: "1px solid black" }}>{group.instrument} (Track {group.track + 1})</h4>
-              <div
-                style={{
-                  position: 'relative',
-                  width: maxTime * 100 + 'px',
-                  height: (maxMidi - minMidi + 1) * 20 + 'px',
-                  padding: "20px",
-                }}
-              >
-                {group.notes.map(note => (
-                  <DraggableNote
-                    key={note.id}
-                    note={note}
-                    minMidi={minMidi}
-                    onDrag={(dx, dy, isResize) =>
-                      handleDrag(note.id, dx, dy, isResize)
-                    }
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-  
-
   return (
     <div style={{ margin: '20px', padding: "20px", overflow: 'auto' }}>
       <h2>MIDI File Visualizer with Note Editing</h2>
       <FileInput ref={fileInputRef}  handleFileUpload={handleFileChange}/>
       <div style={{ margin: '20px', padding: "10px", overflow: 'scroll', border: '1px solid black' }}>
-        {notes.length > 0 ? renderPianoRoll() : <p>Upload a MIDI file to see notes.</p>}
+        {notes.length > 0 ? renderPianoRoll(notes, handleDrag) : <p>Upload a MIDI file to see notes.</p>}
       </div>
       <div style={buttonContainerStyles}>
       <Button
@@ -132,69 +141,6 @@ function MidiVisualizer() {
         onClick={() => console.log("Export to audio not implemented yet")}
       />
         </div>
-    </div>
-  );
-}
-
-function DraggableNote({ note, minMidi, onDrag }) {
-  const ref = useRef(null);
-  const resizing = useRef(false);
-  const startPos = useRef({ x: 0, y: 0 });
-
-  const handleMouseDown = (e, isResize = false) => {
-    resizing.current = isResize;
-    startPos.current = { x: e.clientX, y: e.clientY };
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-  };
-
-  const onMouseMove = (e) => {
-    const dx = e.clientX - startPos.current.x;
-    const dy = e.clientY - startPos.current.y;
-    onDrag(dx, dy, resizing.current);
-    startPos.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const onMouseUp = () => {
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onMouseUp);
-  };
-
-  const top = (note.midi - minMidi) * 20;
-  const left = note.time * 100;
-  const width = note.duration * 100;
-
-  return (
-    <div
-      ref={ref}
-      style={{
-        position: 'absolute',
-        top: top,
-        left: left,
-        width: width,
-        height: '18px',
-        backgroundColor: `rgba(30, 144, 255, ${note.velocity})`,
-        border: '1px solid #0077cc',
-        borderRadius: '4px',
-        cursor: 'move',
-        userSelect: 'none',
-      }}
-      onMouseDown={(e) => handleMouseDown(e, false)}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          right: 0,
-          width: '6px',
-          height: '100%',
-          backgroundColor: 'white',
-          cursor: 'ew-resize',
-        }}
-        onMouseDown={(e) => {
-          e.stopPropagation();
-          handleMouseDown(e, true);
-        }}
-      />
     </div>
   );
 }
