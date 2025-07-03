@@ -40,4 +40,50 @@ const exportToAudio = async (tracks, midiName, recorder) => {
   };
 
   export default exportToAudio;
-  
+
+export async function exportTracksToAudio(tracks, onDone) {
+  // Ensure the AudioContext has been resumed after user interaction
+  await Tone.start();
+
+  const synth = new Tone.Sampler({
+    urls: urlsObj,
+    release: 1,
+  }).toDestination();
+
+  // Wait for sampler to load
+  await synth.load();
+
+  const context = Tone.getContext().rawContext;
+  const dest = context.createMediaStreamDestination();
+  const recorder = new MediaRecorder(dest.stream);
+  synth.connect(dest);
+
+  const chunks = [];
+
+  recorder.ondataavailable = (e) => chunks.push(e.data);
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+    const url = URL.createObjectURL(blob);
+    onDone(url); // callback with audio URL
+  };
+
+  // Schedule notes
+  tracks.forEach((note) => {
+    const freq = Tone.Frequency(note.midi, "midi").toFrequency();
+    Tone.Transport.schedule((time) => {
+      synth.triggerAttackRelease(freq, note.duration, time, note.velocity || 0.7);
+    }, note.time);
+  });
+
+  const totalDuration = Math.max(...tracks.map(n => n.time + n.duration));
+
+  recorder.start();
+  Tone.Transport.start();
+
+  // Stop after the last note
+  setTimeout(() => {
+    recorder.stop();
+    Tone.Transport.stop();
+    Tone.Transport.cancel(); // Clear scheduled notes
+  }, (totalDuration + 1) * 1000); // extra second to catch reverb tail
+}
