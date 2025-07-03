@@ -48,6 +48,7 @@ export async function exportTracksToAudio(tracks, pianoSampler, onDone) {
   const context = Tone.getContext().rawContext;
   const dest = context.createMediaStreamDestination();
   const recorder = new MediaRecorder(dest.stream);
+  pianoSampler.current.connect(dest); 
 
   const chunks = [];
 
@@ -85,7 +86,7 @@ export async function exportTracksToAudio(tracks, pianoSampler, onDone) {
     }, note.time);
   });
 
-  const totalDuration = Math.max(...tracks.map(n => n.time + n.duration));
+  const totalDuration = Math.max(...allNotes.map(n => n.time + n.duration));
 
   recorder.start();
   Tone.Transport.start();
