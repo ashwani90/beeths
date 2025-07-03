@@ -1,57 +1,58 @@
 import * as Tone from 'tone';
+import { urlsObj } from '../data/notesUrl';
 
-
-const exportToAudio = async (tracks, midiName, recorder) => {
+// const exportToAudio = async (tracks, midiName, recorder) => {
 
     
-    await Tone.start();
+//     await Tone.start();
 
-    // Prepare the recorder
-    recorder.current.start();
+//     // Prepare the recorder
+//     recorder.current.start();
 
-    // Play notes
-    const synth = new Tone.PolySynth().connect(recorder.current);
-    const now = Tone.now();
-    tracks.forEach((track) => {
-      track.notes.forEach((note) => {
-        synth.triggerAttackRelease(
-          Tone.Frequency(note.midi, 'midi'),
-          note.duration,
-          now + note.time
-        );
-      });
-    });
+//     // Play notes
+//     const synth = new Tone.PolySynth().connect(recorder.current);
+//     const now = Tone.now();
+//     tracks.forEach((track) => {
+//       track.notes.forEach((note) => {
+//         synth.triggerAttackRelease(
+//           Tone.Frequency(note.midi, 'midi'),
+//           note.duration,
+//           now + note.time
+//         );
+//       });
+//     });
 
-    // Wait for the playback to finish
-    Tone.Transport.start();
-    await Tone.Transport.pause("+1"); // Ensure buffer finalization
-    const recording = await recorder.current.stop();
+//     // Wait for the playback to finish
+//     Tone.Transport.start();
+//     await Tone.Transport.pause("+1"); // Ensure buffer finalization
+//     const recording = await recorder.current.stop();
 
-    // Create a WAV blob
-    const blob = new Blob([recording], { type: 'audio/wav' });
-    const url = URL.createObjectURL(blob);
+//     // Create a WAV blob
+//     const blob = new Blob([recording], { type: 'audio/wav' });
+//     const url = URL.createObjectURL(blob);
 
-    // Download the WAV file
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${midiName || 'output'}.wav`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+//     // Download the WAV file
+//     const link = document.createElement('a');
+//     link.href = url;
+//     link.download = `${midiName || 'output'}.wav`;
+//     link.click();
+//     URL.revokeObjectURL(url);
+//   };
 
-  export default exportToAudio;
+//   export default exportToAudio;
 
 export async function exportTracksToAudio(tracks, onDone) {
   // Ensure the AudioContext has been resumed after user interaction
   await Tone.start();
+  const synth = new Tone.Synth().toDestination();
 
-  const synth = new Tone.Sampler({
-    urls: urlsObj,
-    release: 1,
-  }).toDestination();
+  // const synth = new Tone.Sampler({
+  //   urls: urlsObj,
+  //   release: 1,
+  // }).toDestination();
 
   // Wait for sampler to load
-  await synth.load();
+  await synth.loaded;
 
   const context = Tone.getContext().rawContext;
   const dest = context.createMediaStreamDestination();
@@ -68,7 +69,26 @@ export async function exportTracksToAudio(tracks, onDone) {
   };
 
   // Schedule notes
-  tracks.forEach((note) => {
+  const allNotes = tracks
+  .flatMap((track) => track.notes || [])
+  .filter((note) =>
+    typeof note.midi === 'number' &&
+    !isNaN(note.midi) &&
+    note.midi >= 0 &&
+    note.midi <= 127
+  );
+
+  allNotes.forEach((note) => {
+    if (
+      typeof note.midi !== 'number' ||
+      isNaN(note.midi) ||
+      note.midi < 0 ||
+      note.midi > 127
+    ) {
+      console.warn('Invalid MIDI note skipped:', note);
+      return;
+    }
+  
     const freq = Tone.Frequency(note.midi, "midi").toFrequency();
     Tone.Transport.schedule((time) => {
       synth.triggerAttackRelease(freq, note.duration, time, note.velocity || 0.7);
