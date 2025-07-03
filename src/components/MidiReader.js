@@ -138,7 +138,7 @@ function MidiVisualizer() {
         />
       <Button
         label='Export To Audio'
-        onClick={() => console.log("Export to audio not implemented yet")}
+        onClick={() => exportToWav(tracks)}
       />
         </div>
     </div>
