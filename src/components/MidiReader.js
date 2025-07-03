@@ -8,6 +8,8 @@ import FileInput from './common/FileInput';
 import { buttonContainerStyles } from '../styles/buttonContainer';
 import renderPianoRoll from './PianoRollComp';
 import {exportTracksToAudio} from '../utils/audio';
+import * as Tone from 'tone';
+import { urlsObj } from '../data/notesUrl';
 
 function MidiVisualizer() {
   const [notes, setNotes] = useState([]);
@@ -16,6 +18,13 @@ function MidiVisualizer() {
   const [tracks, setTracks] = useState([]);
   const [midiName, setMidiName] = useState('');
   const { isPlaying, playNotes } = usePlayNotes();
+  const pianoSampler = useRef(null);
+
+  useEffect(() => {
+      pianoSampler.current = new Tone.Sampler({
+        urls: urlsObj,
+      }).toDestination();
+    }, [tracks]);
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
@@ -51,7 +60,7 @@ function MidiVisualizer() {
   };
 
   const exportToWav = async (tracks) => {
-    exportTracksToAudio(tracks, (audioUrl) => {
+    exportTracksToAudio(tracks, pianoSampler, (audioUrl) => {
       const a = document.createElement('a');
       a.href = audioUrl;
       a.download = 'output.ogg';

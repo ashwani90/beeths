@@ -41,23 +41,13 @@ import { urlsObj } from '../data/notesUrl';
 
 //   export default exportToAudio;
 
-export async function exportTracksToAudio(tracks, onDone) {
+export async function exportTracksToAudio(tracks, pianoSampler, onDone) {
   // Ensure the AudioContext has been resumed after user interaction
   await Tone.start();
-  const synth = new Tone.Synth().toDestination();
-
-  // const synth = new Tone.Sampler({
-  //   urls: urlsObj,
-  //   release: 1,
-  // }).toDestination();
-
-  // Wait for sampler to load
-  await synth.loaded;
 
   const context = Tone.getContext().rawContext;
   const dest = context.createMediaStreamDestination();
   const recorder = new MediaRecorder(dest.stream);
-  synth.connect(dest);
 
   const chunks = [];
 
@@ -91,7 +81,7 @@ export async function exportTracksToAudio(tracks, onDone) {
   
     const freq = Tone.Frequency(note.midi, "midi").toFrequency();
     Tone.Transport.schedule((time) => {
-      synth.triggerAttackRelease(freq, note.duration, time, note.velocity || 0.7);
+      pianoSampler.current.triggerAttackRelease(freq, note.duration, time, note.velocity || 0.7);
     }, note.time);
   });
 
