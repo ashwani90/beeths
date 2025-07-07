@@ -19,6 +19,9 @@ function MusicEditorDemo() {
   let synth = useRef(null);
   const drumSampler = useRef(null);
   const { isPlaying, playNotes } = usePlayNotes();
+  const [tracks, setTracks] = useState([
+    { id: "piano", name: "piano", notes: [] },
+  ]);
 
   useEffect(() => {
     drumSampler.current = new Tone.Sampler({
@@ -30,6 +33,16 @@ function MusicEditorDemo() {
       },
     }).toDestination();
   }, []);
+
+  useEffect(() => {
+    setTracks(prevTracks =>
+      prevTracks.map(track =>
+        track.id == 'piano'
+          ? { ...track, notes: notes }
+          : track
+      )
+    );
+  }, [notes])
   
   return (
     <div style={{ padding: 20, fontFamily: 'Arial' }}>
