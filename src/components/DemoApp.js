@@ -8,6 +8,7 @@ import Select from './common/Select';
 import DrumGridEditor from './editors/DrumGridEditor';
 import { DRUM_STEPS, INSTRUMENTS } from '../constants/music';
 import PianoRollEditor from './editors/PianoRollEditor';
+import { exportToMidi } from '../utils/track';
 
 function MusicEditorDemo() {
   const [notes, setNotes] = useState([]);
@@ -50,7 +51,7 @@ function MusicEditorDemo() {
       <div style={buttonContainerStyles}>
         <Button onClick={() => playNotes(notes)} disabled={isPlaying} label={isPlaying ? "Playing..." : "Play Notes"} />
         <Button onClick={() => console.log("Unable to stop for now")} label="Stop" />
-        <Button label="Export To Midi" />
+        <Button label="Export To Midi"  onClick={() => exportToMidi(tracks, 0)} />
         <Button label="Export To Audio" />
       </div>
     </div>
