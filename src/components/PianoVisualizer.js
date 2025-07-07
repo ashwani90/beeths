@@ -2,21 +2,26 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Midi } from '@tonejs/midi';
 import * as Tone from 'tone';
 import { exportToMidi } from '../utils/track';
-import usePianoSampler from '../hooks/usePianoSample';
-import exportToAudio from '../utils/audio';
 import withContainer from '../hoc/withContainer';
 import { drawTrack } from '../utils/track';
 import Button from './common/Button';
 import FileInput from './common/FileInput';
 import { buttonContainerStyles } from '../styles/buttonContainer';
+import {exportTracksToAudio} from '../utils/audio';
 
 const PianoVisualizer = () => {
   const [tracks, setTracks] = useState([]);
   const [duration, setDuration] = useState(0);
   const [midiName, setMidiName] = useState('');
-  const sampler = usePianoSampler();
+  const sampler = useRef(null);
   const recorder = useRef(new Tone.Recorder());
   const cursorRefs = useRef([]);
+
+  useEffect(() => {
+        sampler.current = new Tone.Sampler({
+          urls: urlsObj,
+        }).toDestination();
+      }, [tracks]);
 
   const handleFileUpload = async (e) => {
     console.log("Going inside it");
@@ -104,49 +109,57 @@ const PianoVisualizer = () => {
 
   
   const exportToWav = async (tracks) => {
-    await Tone.start();
 
-    const recorder = new Tone.Recorder();
-    const synth = new Tone.PolySynth(Tone.Synth).connect(recorder);
-    recorder.start();
+    exportTracksToAudio(tracks, sampler, (audioUrl) => {
+          const a = document.createElement('a');
+          a.href = audioUrl;
+          a.download = 'output.ogg';
+          a.click();
+        });
 
-    const now = Tone.now();
+    // await Tone.start();
 
-    tracks.forEach((track) => {
-      track.notes.forEach((note) => {
-        synth.triggerAttackRelease(
-          Tone.Frequency(note.midi, "midi"),
-          note.duration,
-          now + note.time
-        );
-      });
-    });
+    // const recorder = new Tone.Recorder();
+    // const synth = new Tone.PolySynth(Tone.Synth).connect(recorder);
+    // recorder.start();
 
-    Tone.Transport.start();
+    // const now = Tone.now();
 
-    // Wait for playback duration
-    const playbackDuration = tracks.reduce((max, track) => {
-      const lastNote = track.notes[track.notes.length - 1];
-      return Math.max(max, lastNote.time + lastNote.duration);
-    }, 0);
+    // tracks.forEach((track) => {
+    //   track.notes.forEach((note) => {
+    //     synth.triggerAttackRelease(
+    //       Tone.Frequency(note.midi, "midi"),
+    //       note.duration,
+    //       now + note.time
+    //     );
+    //   });
+    // });
 
-    await new Promise((resolve) =>
-      setTimeout(() => {
-        Tone.Transport.stop();
-        resolve();
-      }, (playbackDuration + 0.5) * 1000)
-    );
+    // Tone.Transport.start();
 
-    // Stop recording and save the file
-    const recording = await recorder.stop();
-    const blob = new Blob([recording], { type: "audio/wav" });
-    const url = URL.createObjectURL(blob);
+    // // Wait for playback duration
+    // const playbackDuration = tracks.reduce((max, track) => {
+    //   const lastNote = track.notes[track.notes.length - 1];
+    //   return Math.max(max, lastNote.time + lastNote.duration);
+    // }, 0);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${midiName || "output"}.wav`;
-    link.click();
-    URL.revokeObjectURL(url);
+    // await new Promise((resolve) =>
+    //   setTimeout(() => {
+    //     Tone.Transport.stop();
+    //     resolve();
+    //   }, (playbackDuration + 0.5) * 1000)
+    // );
+
+    // // Stop recording and save the file
+    // const recording = await recorder.stop();
+    // const blob = new Blob([recording], { type: "audio/wav" });
+    // const url = URL.createObjectURL(blob);
+
+    // const link = document.createElement("a");
+    // link.href = url;
+    // link.download = `${midiName || "output"}.wav`;
+    // link.click();
+    // URL.revokeObjectURL(url);
   };
   
 
