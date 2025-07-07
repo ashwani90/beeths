@@ -8,6 +8,7 @@ import Button from './common/Button';
 import FileInput from './common/FileInput';
 import { buttonContainerStyles } from '../styles/buttonContainer';
 import {exportTracksToAudio} from '../utils/audio';
+import { urlsObj } from '../data/notesUrl';
 
 const PianoVisualizer = () => {
   const [tracks, setTracks] = useState([]);
