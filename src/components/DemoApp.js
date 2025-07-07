@@ -9,6 +9,8 @@ import DrumGridEditor from './editors/DrumGridEditor';
 import { DRUM_STEPS, INSTRUMENTS } from '../constants/music';
 import PianoRollEditor from './editors/PianoRollEditor';
 import { exportToMidi } from '../utils/track';
+import {exportTracksToAudio} from '../utils/audio';
+import { urlsObj } from '../data/notesUrl';
 
 function MusicEditorDemo() {
   const [notes, setNotes] = useState([]);
@@ -22,6 +24,13 @@ function MusicEditorDemo() {
   const [tracks, setTracks] = useState([
     { id: "piano", name: "piano", notes: [] },
   ]);
+  const sampler = useRef(null);
+
+  useEffect(() => {
+    sampler.current = new Tone.Sampler({
+      urls: urlsObj,
+    }).toDestination();
+  }, [tracks]);
 
   useEffect(() => {
     drumSampler.current = new Tone.Sampler({
@@ -43,6 +52,16 @@ function MusicEditorDemo() {
       )
     );
   }, [notes])
+
+  const exportToWav = async (tracks) => {
+
+    exportTracksToAudio(tracks, sampler, (audioUrl) => {
+          const a = document.createElement('a');
+          a.href = audioUrl;
+          a.download = 'output.ogg';
+          a.click();
+        });
+  };
   
   return (
     <div style={{ padding: 20, fontFamily: 'Arial' }}>
@@ -65,7 +84,7 @@ function MusicEditorDemo() {
         <Button onClick={() => playNotes(notes)} disabled={isPlaying} label={isPlaying ? "Playing..." : "Play Notes"} />
         <Button onClick={() => console.log("Unable to stop for now")} label="Stop" />
         <Button label="Export To Midi"  onClick={() => exportToMidi(tracks, 0)} />
-        <Button label="Export To Audio" />
+        <Button label="Export To Audio" onClick={() => exportToWav(tracks)} />
       </div>
     </div>
   );
