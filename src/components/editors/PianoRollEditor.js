@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { instrumentColors } from '../../data/colors';
 import { NOTE_HEIGHT_EDITOR, KEY_WIDTH, PIANO_KEYS } from '../../constants/music';
 import { midiToNoteName  } from '../../utils/midi';
 
 function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNotes }) {
     const canvasRef = useRef(null);
+    const [noteRects, setNoteRects] = useState([]);
   
     const handleMouseClick = (event) => {
       const canvas = canvasRef.current;
@@ -59,7 +60,8 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
   
       // Draw notes
       const timeScale = 200;
-      notes.forEach(({ midi, time, duration, instrument }) => {
+      const rects = [];
+      notes.forEach(({ midi, time, duration, instrument, id }) => {
         const x = KEY_WIDTH + time * timeScale;
         const y = height - (midi - 21 + 1) * NOTE_HEIGHT_EDITOR;
         const width = duration * timeScale;
@@ -68,7 +70,9 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
         ctx.fillRect(x, y, width, NOTE_HEIGHT_EDITOR - 2);
         ctx.strokeStyle = 'white';
         ctx.strokeRect(x, y, width, NOTE_HEIGHT_EDITOR - 2);
+        rects.push({ id, x, y, width, NOTE_HEIGHT_EDITOR });
       });
+      setNoteRects(rects);
     }, [notes, playingNotes]);
   
     return (
