@@ -74,6 +74,25 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
       });
       setNoteRects(rects);
     }, [notes, playingNotes]);
+
+    const handleClick = (e) => {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+  
+      for (const { id, x, y, w, h } of noteRects) {
+        if (
+          mouseX >= x &&
+          mouseX <= x + w &&
+          mouseY >= y &&
+          mouseY <= y + h
+        ) {
+          onNoteClick(id);
+          break;
+        }
+      }
+    };
   
     return (
       <canvas
