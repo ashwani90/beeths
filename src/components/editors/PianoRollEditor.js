@@ -3,7 +3,7 @@ import { instrumentColors } from '../../data/colors';
 import { NOTE_HEIGHT_EDITOR, KEY_WIDTH, PIANO_KEYS } from '../../constants/music';
 import { midiToNoteName  } from '../../utils/midi';
 
-function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNotes }) {
+function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNotes, onNoteClick }) {
     const canvasRef = useRef(null);
     const [noteRects, setNoteRects] = useState([]);
   
