@@ -131,7 +131,7 @@ const PianoVisualizer = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-2">🎼 Multi-Track Piano Roll</h2>
-      <FileInput handleFileUpload={handleFileUpload}/>
+      <FileInput handleFileUpload={handleFileUpload} />
       {midiName && <div className="mb-2">Loaded: {midiName}</div>}
 
       <div style={{ position: 'relative', overflowX: 'auto', border: '1px solid #ccc' }}>
