@@ -44,7 +44,7 @@ function MidiVisualizer() {
         if (!extractedNotes[index]) {
           extractedNotes[index] = [];
         }
-        extractedNotes[index].push({
+        extractedNotes[0].push({
           midi: note.midi,
           name: note.name,
           time: note.time,
