@@ -5,7 +5,26 @@ import { midiToNoteName  } from '../../utils/midi';
 
 function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNotes, onNoteClick }) {
     const canvasRef = useRef(null);
+    const keyCanvasRef = useRef(null);
     const [noteRects, setNoteRects] = useState([]);
+    const scrollRef = useRef(null);
+    const pianoKeyScrollRef = useRef(null);
+
+    useEffect(() => {
+      const scrollEl = scrollRef.current;
+      const pianoEl = pianoKeyScrollRef.current;
+
+      const handleScroll = () => {
+        pianoEl.scrollTop = scrollEl.scrollTop;
+      };
+
+      scrollEl.addEventListener('scroll', handleScroll);
+
+      return () => {
+        scrollEl.removeEventListener('scroll', handleScroll);
+      };
+    }, []);
+
   
     const handleMouseClick = (event) => {
       if (handleClick(event)) {
@@ -39,27 +58,27 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
       const ctx = canvasRef.current.getContext('2d');
       let width = canvasRef.current.width;
       const height = canvasRef.current.height;
+
+      const keyCanvas = keyCanvasRef.current;
+      keyCanvas.height = PIANO_KEYS * NOTE_HEIGHT_EDITOR;
   
       ctx.clearRect(0, 0, width, height);
   
-      // Draw piano keys vertically
+      const keyCtx = keyCanvas.getContext('2d');
+      keyCtx.clearRect(0, 0, keyCanvas.width, keyCanvas.height);
+
       for (let i = 0; i < PIANO_KEYS; i++) {
         const midiNote = 21 + i;
-        const y = height - (i + 1) * NOTE_HEIGHT_EDITOR;
+        const y = keyCanvas.height - (i + 1) * NOTE_HEIGHT_EDITOR;
         const isBlackKey = [1, 3, 6, 8, 10].includes(midiNote % 12);
-        ctx.fillStyle = isBlackKey ? '#444' : '#eee';
-        ctx.fillRect(0, y, KEY_WIDTH, NOTE_HEIGHT_EDITOR);
-        ctx.strokeStyle = 'cyan';
-        ctx.strokeRect(0, y, KEY_WIDTH, NOTE_HEIGHT_EDITOR);
-  
-        if (playingNotes.includes(midiNote)) {
-          ctx.fillStyle = 'yellow';
-          ctx.fillRect(0, y, KEY_WIDTH, NOTE_HEIGHT_EDITOR);
-        }
-  
-        ctx.fillStyle = 'black';
-        ctx.font = '10px Arial';
-        ctx.fillText(midiToNoteName(midiNote), 5, y + 14);
+        keyCtx.fillStyle = isBlackKey ? '#444' : '#eee';
+        keyCtx.fillRect(0, y, KEY_WIDTH, NOTE_HEIGHT_EDITOR);
+        keyCtx.strokeStyle = 'cyan';
+        keyCtx.strokeRect(0, y, KEY_WIDTH, NOTE_HEIGHT_EDITOR);
+
+        keyCtx.fillStyle = 'black';
+        keyCtx.font = '10px Arial';
+        keyCtx.fillText(midiToNoteName(midiNote), 5, y + 14);
       }
   
       // Draw notes
@@ -112,15 +131,43 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
     };
   
     return (
-      <div style={{ height: '400px', overflowY: 'auto', overflowX: 'auto' }}>
-      <canvas
-        ref={canvasRef}
-        width={1000}
-        height={PIANO_KEYS * NOTE_HEIGHT_EDITOR}
-        style={{ border: '1px solid black', cursor: 'pointer' }}
-        onClick={handleMouseClick}
-      />
+      <div style={{ display: 'flex', width: '70vw' }}>
+      {/* Piano Keys (vertically scrollable) */}
+      <div
+        ref={pianoKeyScrollRef}
+        style={{
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          height: '400px',
+        }}
+      >
+        <canvas
+          ref={keyCanvasRef}
+          width={KEY_WIDTH}
+          height={PIANO_KEYS * NOTE_HEIGHT_EDITOR}
+          style={{ position: 'sticky', left: 0, zIndex: 2 }}
+        />
       </div>
+
+      {/* Notes (both scrollable) */}
+      <div
+        ref={scrollRef}
+        style={{
+          height: '400px',
+          overflowY: 'auto',
+          overflowX: 'auto',
+          width: '80%'
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          height={PIANO_KEYS * NOTE_HEIGHT_EDITOR}
+          style={{ cursor: 'pointer' }}
+          onClick={handleMouseClick}
+        />
+      </div>
+    </div>
+
     );
   }
 
