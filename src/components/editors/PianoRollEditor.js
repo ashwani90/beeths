@@ -25,27 +25,6 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
         scrollEl.removeEventListener('scroll', handleScroll);
       };
     }, []);
-
-    useEffect(() => {
-      const ctx = timeCanvasRef.current.getContext('2d');
-      ctx.clearRect(0, 0, canvasWidth, TIME_HEIGHT);
-    
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, canvasWidth, TIME_HEIGHT);
-      ctx.strokeStyle = '#ccc';
-      ctx.fillStyle = '#000';
-      ctx.font = '12px Arial';
-      ctx.textAlign = 'center';
-    
-      for (let t = 0; t <= durationInSeconds; t++) {
-        const x = t * pixelsPerSecond;
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, TIME_HEIGHT);
-        ctx.stroke();
-        ctx.fillText(`${t}s`, x + 5, 15);
-      }
-    }, [durationInSeconds, pixelsPerSecond]);
   
     const handleMouseClick = (event) => {
       if (handleClick(event)) {
@@ -125,6 +104,7 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
         rects.push({ id, x, y, w: width, h: NOTE_HEIGHT_EDITOR})
       });
       setNoteRects(rects);
+      setCanvasWidth(width);
     }, [notes, playingNotes]);
 
     const handleClick = (e) => {
