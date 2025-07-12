@@ -10,6 +10,8 @@ import renderPianoRoll from './PianoRollComp';
 import {exportTracksToAudio} from '../utils/audio';
 import * as Tone from 'tone';
 import { urlsObj } from '../data/notesUrl';
+import NoteSidebar from './NoteSidebar';
+
 
 function MidiVisualizer() {
   const [notes, setNotes] = useState([]);
@@ -19,6 +21,7 @@ function MidiVisualizer() {
   const [midiName, setMidiName] = useState('');
   const { isPlaying, playNotes } = usePlayNotes();
   const pianoSampler = useRef(null);
+  const [selectedNoteId, setSelectedNoteId] = useState(null);
 
   useEffect(() => {
       pianoSampler.current = new Tone.Sampler({
@@ -96,8 +99,16 @@ function MidiVisualizer() {
     <div style={{ margin: '20px', padding: "20px", overflow: 'auto' }}>
       <h2>MIDI File Visualizer with Note Editing</h2>
       <FileInput ref={fileInputRef}  handleFileUpload={handleFileChange}/>
+      <div style={{ marginTop: 20, display: 'flex', flexDirection: 'row', gap: '20px' }}>
       <div style={{ margin: '20px', padding: "10px", overflow: 'scroll', border: '1px solid black' }}>
-        {notes.length > 0 ? renderPianoRoll(notes, handleDrag) : <p>Upload a MIDI file to see notes.</p>}
+        {notes.length > 0 ? renderPianoRoll(notes, handleDrag, setSelectedNoteId) : <p>Upload a MIDI file to see notes.</p>}
+      </div>
+      <NoteSidebar
+                  selectedNoteId={selectedNoteId}
+                  notes={notes}
+                  setNotes={setNotes}
+                  onClose={() => setSelectedNoteId(null)}
+                />
       </div>
       <div style={buttonContainerStyles}>
       <Button
