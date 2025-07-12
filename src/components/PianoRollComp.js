@@ -3,7 +3,7 @@ import { groupByInstrument } from '../utils/track';
 import DraggableNote from './DraggableNote';
 import renderTimeAxis from "../utils/ticks";
 
-const renderPianoRoll = (notes, handleDrag) => {
+const renderPianoRoll = (notes, handleDrag, setSelectedNoteId) => {
     const groupedTracks = groupByInstrument(notes);
   
     return (
@@ -44,6 +44,7 @@ const renderPianoRoll = (notes, handleDrag) => {
               >
                 {group.notes.map(note => (
                   <DraggableNote
+                    onNoteClick={setSelectedNoteId} 
                     key={note.id}
                     note={note}
                     minMidi={minMidi}
