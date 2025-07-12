@@ -25,7 +25,7 @@ const activeStyles = {
   transform: "scale(0.95)",
 };
 
-const Button = ({ label = "Click Me", onClick }) => {
+const Button = ({ label = "Click Me", onClick, style }) => {
   const [isHovered, setIsHovered] = React.useState(false);
   const [isActive, setIsActive] = React.useState(false);
 
@@ -33,6 +33,7 @@ const Button = ({ label = "Click Me", onClick }) => {
     ...buttonStyles,
     ...(isHovered ? hoverStyles : {}),
     ...(isActive ? activeStyles : {}),
+    ...style,
   };
 
   return (
