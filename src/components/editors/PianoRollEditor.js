@@ -9,6 +9,7 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
     const [noteRects, setNoteRects] = useState([]);
     const scrollRef = useRef(null);
     const pianoKeyScrollRef = useRef(null);
+    const timeCanvasRef = useRef(null);
 
     useEffect(() => {
       const scrollEl = scrollRef.current;
@@ -25,6 +26,26 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
       };
     }, []);
 
+    useEffect(() => {
+      const ctx = timeCanvasRef.current.getContext('2d');
+      ctx.clearRect(0, 0, canvasWidth, TIME_HEIGHT);
+    
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvasWidth, TIME_HEIGHT);
+      ctx.strokeStyle = '#ccc';
+      ctx.fillStyle = '#000';
+      ctx.font = '12px Arial';
+      ctx.textAlign = 'center';
+    
+      for (let t = 0; t <= durationInSeconds; t++) {
+        const x = t * pixelsPerSecond;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, TIME_HEIGHT);
+        ctx.stroke();
+        ctx.fillText(`${t}s`, x + 5, 15);
+      }
+    }, [durationInSeconds, pixelsPerSecond]);
   
     const handleMouseClick = (event) => {
       if (handleClick(event)) {
@@ -131,16 +152,24 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
     };
   
     return (
-      <div style={{ display: 'flex', width: '70vw' }}>
-      {/* Piano Keys (vertically scrollable) */}
+      <>
       <div
-        ref={pianoKeyScrollRef}
-        style={{
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          height: '400px',
+        ref={scrollRef}
+        style={{ overflowX: 'auto' }}
+        onScroll={(e) => {
+          timeCanvasRef.current.scrollLeft = e.target.scrollLeft;
         }}
       >
+        <canvas
+          ref={timeCanvasRef}
+          width={canvasWidth}
+          height={TIME_HEIGHT}
+          style={{ display: 'block' }}
+        />
+      </div>
+      <div style={{ display: 'flex', width: '70vw' }}>
+      {/* Piano Keys (vertically scrollable) */}
+      
         <canvas
           ref={keyCanvasRef}
           width={KEY_WIDTH}
@@ -166,8 +195,7 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
           onClick={handleMouseClick}
         />
       </div>
-    </div>
-
+    </>
     );
   }
 
