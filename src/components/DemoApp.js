@@ -11,6 +11,7 @@ import PianoRollEditor from './editors/PianoRollEditor';
 import { exportToMidi } from '../utils/track';
 import {exportTracksToAudio} from '../utils/audio';
 import { urlsObj } from '../data/notesUrl';
+import NoteSidebar from './NoteSidebar';
 
 function MusicEditorDemo() {
   const [notes, setNotes] = useState([]);
@@ -25,6 +26,7 @@ function MusicEditorDemo() {
     { id: "piano", name: "piano", notes: [] },
   ]);
   const sampler = useRef(null);
+  const [selectedNoteId, setSelectedNoteId] = useState(null);
 
   useEffect(() => {
     sampler.current = new Tone.Sampler({
@@ -72,12 +74,18 @@ function MusicEditorDemo() {
         INSTRUMENTS={INSTRUMENTS}
       />
 
-      <div style={{ marginTop: 20 }}>
+      <div style={{ marginTop: 20, display: 'flex', flexDirection: 'row', gap: '20px' }}>
         {selectedInstrument === 'drums' ? (
           <DrumGridEditor drumNotes={drumNotes} onUpdateDrumNotes={setDrumNotes} playingStep={playingStep} />
         ) : (
-          <PianoRollEditor notes={notes} selectedInstrument={selectedInstrument} onUpdateNotes={setNotes} playingNotes={playingNotes} />
+          <PianoRollEditor notes={notes} selectedInstrument={selectedInstrument} onUpdateNotes={setNotes} playingNotes={playingNotes} onNoteClick={setSelectedNoteId} />
         )}
+        <NoteSidebar
+            selectedNoteId={selectedNoteId}
+            notes={notes}
+            setNotes={setNotes}
+            onClose={() => setSelectedNoteId(null)}
+          />
       </div>
 
       <div style={buttonContainerStyles}>
