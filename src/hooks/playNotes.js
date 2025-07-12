@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import * as Tone from 'tone';
 import { urlsObj } from '../data/notesUrl';
 
+
+// TODO:: COntrol velocity of the track
 const usePlayNotes = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const pianoSampler = useRef(null);
