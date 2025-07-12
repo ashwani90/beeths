@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import TextInput from './common/TextInput';
+import Button from './common/Button';
 
 export default function NoteSidebar({ selectedNoteId, notes, setNotes, onClose }) {
   const [noteData, setNoteData] = useState(null);
@@ -32,38 +34,25 @@ export default function NoteSidebar({ selectedNoteId, notes, setNotes, onClose }
     <aside style={{
       width: '250px',
       padding: '16px',
+      paddingLeft: "32px",
       borderLeft: '1px solid #ccc',
       backgroundColor: '#f9f9f9',
     }}>
       <h3>Edit Note</h3>
       <div>
         <label>Note Name:</label>
-        <input
-          type="text"
-          value={noteData.name}
-          onChange={e => handleChange('name', e.target.value)}
-        />
+        <TextInput val={noteData.midi} handleChange={(name, val) => handleChange(name, val)} name='midi'  type="text"/>
       </div>
       <div>
         <label>Time:</label>
-        <input
-          type="number"
-          step="0.01"
-          value={noteData.time}
-          onChange={e => handleChange('time', e.target.value)}
-        />
+        <TextInput val={noteData.time} handleChange={(name, val) => handleChange(name, val)} name='time'  type="number"/>
       </div>
       <div>
         <label>Duration:</label>
-        <input
-          type="number"
-          step="0.01"
-          value={noteData.duration}
-          onChange={e => handleChange('duration', e.target.value)}
-        />
+        <TextInput val={noteData.duration} handleChange={(name, val) => handleChange(name, val)} name='duration' type="number"/>
       </div>
-      <button onClick={handleSave}>Save</button>
-      <button onClick={onClose} style={{ marginLeft: '8px' }}>Cancel</button>
+      <Button label="Save"  onClick={handleSave} />
+      <Button label="Cancel" onClick={onClose} style={{ marginLeft: '8px' }}/>
     </aside>
   );
 }
