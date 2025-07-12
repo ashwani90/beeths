@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TextInput from './common/TextInput';
 import Button from './common/Button';
+import { midiToNoteName } from '../utils/midi';
 
 export default function NoteSidebar({ selectedNoteId, notes, setNotes, onClose }) {
   const [noteData, setNoteData] = useState(null);
@@ -40,7 +41,7 @@ export default function NoteSidebar({ selectedNoteId, notes, setNotes, onClose }
     }}>
       <h3>Edit Note</h3>
       <div>
-        <label>Note Name:</label>
+        <label>Note Name: {midiToNoteName(noteData.midi)}</label>
         <TextInput val={noteData.midi} handleChange={(name, val) => handleChange(name, val)} name='midi'  type="text"/>
       </div>
       <div>
