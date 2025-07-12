@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 
-function DraggableNote({ note, minMidi, onDrag }) {
+function DraggableNote({ note, minMidi, onDrag, onNoteClick }) {
     const ref = useRef(null);
     const resizing = useRef(false);
     const startPos = useRef({ x: 0, y: 0 });
@@ -43,7 +43,8 @@ function DraggableNote({ note, minMidi, onDrag }) {
           cursor: 'move',
           userSelect: 'none',
         }}
-        onMouseDown={(e) => handleMouseDown(e, false)}
+        onClick={() => onNoteClick(note.id)}
+        // onMouseDown={(e) => handleMouseDown(e, false)}
       >
         <div
           style={{
@@ -54,10 +55,10 @@ function DraggableNote({ note, minMidi, onDrag }) {
             backgroundColor: 'white',
             cursor: 'ew-resize',
           }}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            handleMouseDown(e, true);
-          }}
+          // onMouseDown={(e) => {
+          //   e.stopPropagation();
+          //   handleMouseDown(e, true);
+          // }}
         />
       </div>
     );
