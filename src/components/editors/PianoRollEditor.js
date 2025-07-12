@@ -8,6 +8,9 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
     const [noteRects, setNoteRects] = useState([]);
   
     const handleMouseClick = (event) => {
+      if (handleClick(event)) {
+        return;
+      }
       const canvas = canvasRef.current;
       const rect = canvas.getBoundingClientRect();
       const mouseX = event.clientX - rect.left;
@@ -22,6 +25,7 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
         onUpdateNotes([
           ...notes,
           {
+            id: midiNote + '-' + time + '-' + duration,
             midi: midiNote,
             time,
             duration,
@@ -65,12 +69,13 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
         const x = KEY_WIDTH + time * timeScale;
         const y = height - (midi - 21 + 1) * NOTE_HEIGHT_EDITOR;
         const width = duration * timeScale;
+        // id = "" + x + '' + y + width + NOTE_HEIGHT_EDITOR;
   
         ctx.fillStyle = instrumentColors[instrument] || 'gray';
         ctx.fillRect(x, y, width, NOTE_HEIGHT_EDITOR - 2);
         ctx.strokeStyle = 'white';
         ctx.strokeRect(x, y, width, NOTE_HEIGHT_EDITOR - 2);
-        rects.push({ id, x, y, width, NOTE_HEIGHT_EDITOR });
+        rects.push({ id, x, y, w: width, h: NOTE_HEIGHT_EDITOR})
       });
       setNoteRects(rects);
     }, [notes, playingNotes]);
@@ -78,10 +83,13 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
     const handleClick = (e) => {
       const canvas = canvasRef.current;
       const rect = canvas.getBoundingClientRect();
+
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
+      
   
       for (const { id, x, y, w, h } of noteRects) {
+
         if (
           mouseX >= x &&
           mouseX <= x + w &&
@@ -89,9 +97,11 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
           mouseY <= y + h
         ) {
           onNoteClick(id);
-          break;
+          console.log(`Clicked note ID: ${id}`);
+          return true;
         }
       }
+      return false; // Return false to indicate no click was handled
     };
   
     return (
