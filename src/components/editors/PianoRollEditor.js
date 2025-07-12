@@ -37,7 +37,7 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
   
     useEffect(() => {
       const ctx = canvasRef.current.getContext('2d');
-      const width = canvasRef.current.width;
+      let width = canvasRef.current.width;
       const height = canvasRef.current.height;
   
       ctx.clearRect(0, 0, width, height);
@@ -64,6 +64,13 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
   
       // Draw notes
       const timeScale = 200;
+      // 1. Determine the maximum time extent of notes
+      const maxEndTime = Math.max(...notes.map(n => n.time + n.duration), 0);
+      const requiredWidth = KEY_WIDTH + maxEndTime * timeScale + 100; // Extra padding
+      if (canvasRef.current.width < requiredWidth) {
+        canvasRef.current.width = requiredWidth;
+      }
+      width = canvasRef.current.width;
       const rects = [];
       notes.forEach(({ midi, time, duration, instrument, id }) => {
         const x = KEY_WIDTH + time * timeScale;
@@ -105,6 +112,7 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
     };
   
     return (
+      <div style={{ height: '400px', overflowY: 'auto', overflowX: 'auto' }}>
       <canvas
         ref={canvasRef}
         width={1000}
@@ -112,6 +120,7 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
         style={{ border: '1px solid black', cursor: 'pointer' }}
         onClick={handleMouseClick}
       />
+      </div>
     );
   }
 
