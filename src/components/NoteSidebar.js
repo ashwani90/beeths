@@ -29,6 +29,17 @@ export default function NoteSidebar({ selectedNoteId, notes, setNotes, onClose }
     onClose();
   };
 
+  const handleAddNew = () => {
+    console.log(noteData.midi, noteData.time, noteData.duration);
+    const newNote = {
+      id: Date.now(),
+      midi: noteData.midi || 60, // Default to middle C if not set
+      time: noteData.time || 0,
+      duration: noteData.duration || 1,
+    };
+    setNotes(prevNotes => [...prevNotes, newNote]);
+  }
+
   if (!noteData) return null;
 
   return (
@@ -53,7 +64,7 @@ export default function NoteSidebar({ selectedNoteId, notes, setNotes, onClose }
         <TextInput val={noteData.duration} handleChange={(name, val) => handleChange(name, val)} name='duration' type="number"/>
       </div>
       <Button label="Save"  onClick={handleSave} />
-      <Button label="Cancel" onClick={onClose} style={{ marginLeft: '8px' }}/>
+      <Button label="Add New" style={{ marginLeft: '8px' }} onClick={handleAddNew} />
     </aside>
   );
 }
