@@ -9,7 +9,6 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
     const [noteRects, setNoteRects] = useState([]);
     const scrollRef = useRef(null);
     const pianoKeyScrollRef = useRef(null);
-    const timeCanvasRef = useRef(null);
 
     useEffect(() => {
       const scrollEl = scrollRef.current;
@@ -104,7 +103,6 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
         rects.push({ id, x, y, w: width, h: NOTE_HEIGHT_EDITOR})
       });
       setNoteRects(rects);
-      setCanvasWidth(width);
     }, [notes, playingNotes]);
 
     const handleClick = (e) => {
@@ -132,24 +130,16 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
     };
   
     return (
-      <>
+      <div style={{ display: 'flex', width: "80vw" }}>
+      {/* Piano Keys (vertically scrollable) */}
       <div
-        ref={scrollRef}
-        style={{ overflowX: 'auto' }}
-        onScroll={(e) => {
-          timeCanvasRef.current.scrollLeft = e.target.scrollLeft;
+        ref={pianoKeyScrollRef}
+        style={{
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          height: '400px',
         }}
       >
-        <canvas
-          ref={timeCanvasRef}
-          width={canvasWidth}
-          height={TIME_HEIGHT}
-          style={{ display: 'block' }}
-        />
-      </div>
-      <div style={{ display: 'flex', width: '70vw' }}>
-      {/* Piano Keys (vertically scrollable) */}
-      
         <canvas
           ref={keyCanvasRef}
           width={KEY_WIDTH}
@@ -165,7 +155,7 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
           height: '400px',
           overflowY: 'auto',
           overflowX: 'auto',
-          width: '80%'
+          width: '90%',
         }}
       >
         <canvas
@@ -175,7 +165,8 @@ function PianoRollEditor({ notes, selectedInstrument, onUpdateNotes, playingNote
           onClick={handleMouseClick}
         />
       </div>
-    </>
+    </div>
+
     );
   }
 
