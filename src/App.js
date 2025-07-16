@@ -6,6 +6,7 @@ import MidiPlayer from './components/MidiPlayer';
 import PianoVisualizer from './components/PianoVisualizer';
 import Navbar from './components/Navbar';
 import NotFound from './components/NotFound';
+import MidiUploader from './components/MidiUploader';
 
 function App() {
 
@@ -17,7 +18,7 @@ function App() {
         <Route path="/" element={<PianoVisualizer />} />
         <Route path="/demo" element={<MusicEditorDemo />} />
         <Route path="/visualizer" element={<MidiVisualizer />} />
-        <Route path="/player" element={<MidiPlayer />} />
+        <Route path="/uploader" element={<MidiUploader />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
