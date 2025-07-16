@@ -25,7 +25,7 @@ export default function Navbar() {
 
   return (
     <nav style={styles.navbar}>
-      {['/', '/demo', '/visualizer', '/player'].map((path, index) => (
+      {['/', '/demo', '/visualizer', '/uploader'].map((path, index) => (
         <Link
           key={index}
           to={path}
@@ -33,7 +33,7 @@ export default function Navbar() {
           onMouseEnter={() => setHovered(index)}
           onMouseLeave={() => setHovered(null)}
         >
-          {['Home', 'Create Music', 'Music Editor', 'Simple Midi Player'][index]}
+          {['Home', 'Create Music', 'Music Editor', 'Midi Uploader'][index]}
         </Link>
       ))}
     </nav>
